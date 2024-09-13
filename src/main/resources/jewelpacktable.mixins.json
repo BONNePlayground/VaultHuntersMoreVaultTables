@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "lv.id.bonne.vaulthunters.jewelpacktable.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "jewelpacktable.refmap.json",
+  "mixins": [
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
