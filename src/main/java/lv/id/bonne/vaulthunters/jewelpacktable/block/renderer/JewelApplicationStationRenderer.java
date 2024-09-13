@@ -22,20 +22,20 @@ public class JewelApplicationStationRenderer implements BlockEntityRenderer<Vaul
   }
 
   public void render(VaultJewelApplicationStationTileEntity tile, float partialTicks, @Nonnull PoseStack poseStack, @Nonnull MultiBufferSource bufferIn, int combinedLightIn, int combinedOverlayIn) {
-    ItemStack tool = tile.getRenderedTool();
-    if (!tool.isEmpty()) {
-      poseStack.pushPose();
-      poseStack.translate(0.5, 0.65, 0.5);
-      Direction facing = (Direction)tile.getBlockState().getValue(ToolStationBlock.FACING);
-      poseStack.translate(0.0, 0.21, 0.0);
-      poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - facing.toYRot()));
-      poseStack.translate(-0.2, 0.0, 0.0);
-      poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
-      poseStack.mulPose(Vector3f.ZP.rotationDegrees(45.0F));
-      Minecraft minecraft = Minecraft.getInstance();
-      minecraft.getItemRenderer().renderStatic(tool, ItemTransforms.TransformType.FIXED, combinedLightIn, combinedOverlayIn, poseStack, bufferIn, 0);
-      poseStack.popPose();
-    }
+//    ItemStack tool = tile.getRenderedTool();
+//    if (!tool.isEmpty()) {
+//      poseStack.pushPose();
+//      poseStack.translate(0.5, 0.65, 0.5);
+//      Direction facing = (Direction)tile.getBlockState().getValue(ToolStationBlock.FACING);
+//      poseStack.translate(0.0, 0.21, 0.0);
+//      poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - facing.toYRot()));
+//      poseStack.translate(-0.2, 0.0, 0.0);
+//      poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
+//      poseStack.mulPose(Vector3f.ZP.rotationDegrees(45.0F));
+//      Minecraft minecraft = Minecraft.getInstance();
+//      minecraft.getItemRenderer().renderStatic(tool, ItemTransforms.TransformType.FIXED, combinedLightIn, combinedOverlayIn, poseStack, bufferIn, 0);
+//      poseStack.popPose();
+//    }
 
   }
 }

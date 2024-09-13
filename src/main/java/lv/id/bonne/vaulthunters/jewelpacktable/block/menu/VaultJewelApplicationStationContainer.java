@@ -2,16 +2,14 @@ package lv.id.bonne.vaulthunters.jewelpacktable.block.menu;
 
 import iskallia.vault.container.oversized.OverSizedSlotContainer;
 import iskallia.vault.container.slot.TabSlot;
-import iskallia.vault.init.ModSlotIcons;
+import iskallia.vault.item.JewelPouchItem;
 import iskallia.vault.item.tool.JewelItem;
-import iskallia.vault.item.tool.ToolItem;
 import lv.id.bonne.vaulthunters.jewelpacktable.block.entity.VaultJewelApplicationStationTileEntity;
 import lv.id.bonne.vaulthunters.jewelpacktable.init.ModContainers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -52,16 +50,23 @@ public class VaultJewelApplicationStationContainer extends OverSizedSlotContaine
       this.addSlot(new TabSlot(playerInventory, hotbarSlot, 58 + hotbarSlot * 18, 166));
     }
 
-    Container invContainer = this.tileEntity.getInventory();
-    this.addSlot((new TabSlot(invContainer, 0, 120, 73) {
-      public boolean mayPlace(ItemStack stack) {
-        return stack.getItem() instanceof ToolItem;
-      }
-    }).setBackground(InventoryMenu.BLOCK_ATLAS, ModSlotIcons.TOOL_NO_ITEM));
+    Container invContainer = this.tileEntity.getInputInventory();
 
     for(i = 0; i < 20; ++i) {
       for(int j = 0; j < 3; ++j) {
-        this.addSlot(new TabSlot(invContainer, i * 3 + j + 1, -999 + j * 18, 50 + i * 18) {
+        this.addSlot(new TabSlot(invContainer, i * 3 + j, -999 + j * 18, 50 + i * 18) {
+          public boolean mayPlace(ItemStack stack) {
+            return stack.getItem() instanceof JewelPouchItem;
+          }
+        });
+      }
+    }
+
+    Container outContainer = this.tileEntity.getOutputInventory();
+
+    for(i = 0; i < 20; ++i) {
+      for(int j = 0; j < 3; ++j) {
+        this.addSlot(new TabSlot(outContainer, i * 3 + j, 999 + j * 18, 50 + i * 18) {
           public boolean mayPlace(ItemStack stack) {
             return stack.getItem() instanceof JewelItem;
           }

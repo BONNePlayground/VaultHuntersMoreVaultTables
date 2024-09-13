@@ -68,12 +68,20 @@ public class VaultJewelApplicationStationBlock extends FacedBlock implements Ent
       BlockEntity tile = level.getBlockEntity(pos);
       if (tile instanceof VaultJewelApplicationStationTileEntity) {
         VaultJewelApplicationStationTileEntity applicationStation = (VaultJewelApplicationStationTileEntity)tile;
-        applicationStation.getInventory().getOverSizedContents().forEach((overSizedStack) -> {
+        applicationStation.getInputInventory().getOverSizedContents().forEach((overSizedStack) -> {
           overSizedStack.splitByStackSize().forEach((splitStack) -> {
             Containers.dropItemStack(level, (double)pos.getX(), (double)pos.getY(), (double)pos.getZ(), splitStack);
           });
         });
-        applicationStation.getInventory().clearContent();
+        applicationStation.getInputInventory().clearContent();
+
+        applicationStation.getOutputInventory().getOverSizedContents().forEach((overSizedStack) -> {
+          overSizedStack.splitByStackSize().forEach((splitStack) -> {
+            Containers.dropItemStack(level, (double)pos.getX(), (double)pos.getY(), (double)pos.getZ(), splitStack);
+          });
+        });
+        applicationStation.getOutputInventory().clearContent();
+
         level.updateNeighbourForOutputSignal(pos, this);
       }
     }

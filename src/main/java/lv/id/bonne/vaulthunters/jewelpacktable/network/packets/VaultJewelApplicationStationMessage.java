@@ -35,7 +35,6 @@ public class VaultJewelApplicationStationMessage {
                 AbstractContainerMenu patt1027$temp = requester.containerMenu;
                 if (patt1027$temp instanceof VaultJewelApplicationStationContainer) {
                     VaultJewelApplicationStationContainer container = (VaultJewelApplicationStationContainer)patt1027$temp;
-                    container.getTileEntity().applyJewels();
                     return;
                 }
             }

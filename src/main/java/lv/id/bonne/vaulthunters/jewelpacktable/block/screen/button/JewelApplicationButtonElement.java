@@ -48,24 +48,9 @@ public class JewelApplicationButtonElement<E extends JewelApplicationButtonEleme
             }
 
             boolean hasInput = !inputItem.isEmpty();
-            List<Component> tooltip = new ArrayList();
+            List<Component> tooltip = new ArrayList<>();
             if (hasInput) {
-                VaultGearData toolData = VaultGearData.read(container.getTileEntity().getToolItem());
-                int capacity = (Integer)toolData.getFirstValue(ModGearAttributes.TOOL_CAPACITY).orElse(0);
-                if (container.getTileEntity().getTotalSizeInJewels() > 0) {
-                    if (capacity >= container.getTileEntity().getTotalSizeInJewels()) {
-                        tooltip.add(new TextComponent("Apply all Jewels"));
-                        tooltip.add(new TextComponent(""));
-                    }
 
-                    tooltip.add((new TextComponent("Capacity: ")).append((new TextComponent("" + capacity)).withStyle(
-                        Style.EMPTY.withColor(16757593))).append((new TextComponent(" (-" + container.getTileEntity().getTotalSizeInJewels() + ")")).withStyle(Style.EMPTY.withColor(
-                        ChatFormatting.RED))));
-                }
-
-                if (capacity < container.getTileEntity().getTotalSizeInJewels()) {
-                    tooltip.add((new TextComponent("Requires a larger capacity")).withStyle(Style.EMPTY.withColor(ChatFormatting.RED)));
-                }
             } else {
                 tooltip.add((new TextComponent("Requires a Tool")).withStyle(ChatFormatting.RED));
             }
