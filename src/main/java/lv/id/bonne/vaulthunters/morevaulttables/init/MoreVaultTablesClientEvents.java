@@ -9,7 +9,7 @@ package lv.id.bonne.vaulthunters.morevaulttables.init;
 
 import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTablesMod;
 import lv.id.bonne.vaulthunters.morevaulttables.block.renderer.JewelSelectorTableRenderer;
-import lv.id.bonne.vaulthunters.morevaulttables.block.screen.VaultJewelApplicationStationScreen;
+import lv.id.bonne.vaulthunters.morevaulttables.block.screen.JewelSelectorTableScreen;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -28,6 +28,6 @@ public class MoreVaultTablesClientEvents
     {
         ItemBlockRenderTypes.setRenderLayer(MoreVaultTablesReferences.JEWEL_SELECTOR_TABLE_BLOCK, RenderType.cutout());
         BlockEntityRenderers.register(MoreVaultTablesReferences.JEWEL_SELECTOR_TABLE_TILE_ENTITY, JewelSelectorTableRenderer::new);
-        MenuScreens.register(MoreVaultTablesReferences.JEWEL_SELECTOR_TABLE_CONTAINER, VaultJewelApplicationStationScreen::new);
+        MenuScreens.register(MoreVaultTablesReferences.JEWEL_SELECTOR_TABLE_CONTAINER, JewelSelectorTableScreen::new);
     }
 }

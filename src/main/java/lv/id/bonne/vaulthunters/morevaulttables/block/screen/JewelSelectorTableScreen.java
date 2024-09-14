@@ -30,8 +30,6 @@ import iskallia.vault.skill.expertise.type.JewelExpertise;
 import iskallia.vault.skill.tree.ExpertiseTree;
 import iskallia.vault.world.data.PlayerExpertisesData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
-import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTablesMod;
-import lv.id.bonne.vaulthunters.morevaulttables.init.MoreVaultTablesReferences;
 import lv.id.bonne.vaulthunters.morevaulttables.init.MoreVaultTablesTextureAtlases;
 import javax.annotation.Nullable;
 import lv.id.bonne.vaulthunters.morevaulttables.block.menu.JewelSelectorTableContainer;
@@ -49,7 +47,7 @@ import net.minecraft.world.item.TooltipFlag;
 import static com.mojang.blaze3d.platform.InputConstants.Type.MOUSE;
 
 
-public class VaultJewelApplicationStationScreen extends AbstractElementContainerScreen<JewelSelectorTableContainer>
+public class JewelSelectorTableScreen extends AbstractElementContainerScreen<JewelSelectorTableContainer>
 {
     ScrollableClickableItemStackSelectorElement pouchesElement;
 
@@ -66,7 +64,7 @@ public class VaultJewelApplicationStationScreen extends AbstractElementContainer
 
     boolean skipRelease = false;
 
-    public VaultJewelApplicationStationScreen(JewelSelectorTableContainer container,
+    public JewelSelectorTableScreen(JewelSelectorTableContainer container,
         Inventory inventory,
         Component title)
     {
@@ -85,7 +83,7 @@ public class VaultJewelApplicationStationScreen extends AbstractElementContainer
                 {
                     public List<ScrollableClickableItemStackSelectorElement.ItemSelectorEntry> getEntries()
                     {
-                        return VaultJewelApplicationStationScreen.this.getMenu().getTileEntity().getPouches().stream().
+                        return JewelSelectorTableScreen.this.getMenu().getTileEntity().getPouches().stream().
                             map(ItemSelectorWithTooltipEntry::new).
                             collect(Collectors.toList());
                     }
@@ -111,7 +109,7 @@ public class VaultJewelApplicationStationScreen extends AbstractElementContainer
             {
                 public List<ScrollableClickableItemStackSelectorElement.ItemSelectorEntry> getEntries()
                 {
-                    return VaultJewelApplicationStationScreen.this.getMenu().getTileEntity().getJewels().stream().
+                    return JewelSelectorTableScreen.this.getMenu().getTileEntity().getJewels().stream().
                         map(ItemSelectorWithTooltipEntry::new).
                         collect(Collectors.toList());
                 }
@@ -181,7 +179,7 @@ public class VaultJewelApplicationStationScreen extends AbstractElementContainer
                     () -> true).
                     setLabelStackCount().
                     layout((screen, gui, parent, world) -> world.translateXY(gui));
-                this.jewel1.whenClicked(VaultJewelApplicationStationScreen.this.new MouseClickRunnable(121));
+                this.jewel1.whenClicked(JewelSelectorTableScreen.this.new MouseClickRunnable(121));
                 this.addElement(this.jewel1);
                 this.jewel1.setDisabled(() -> false);
 
@@ -204,7 +202,7 @@ public class VaultJewelApplicationStationScreen extends AbstractElementContainer
                     () -> true).
                     setLabelStackCount().
                     layout((screen, gui, parent, world) -> world.translateXY(gui));
-                this.jewel2.whenClicked(VaultJewelApplicationStationScreen.this.new MouseClickRunnable(122));
+                this.jewel2.whenClicked(JewelSelectorTableScreen.this.new MouseClickRunnable(122));
                 this.addElement(this.jewel2);
                 this.jewel2.setDisabled(() -> false);
 
@@ -227,7 +225,7 @@ public class VaultJewelApplicationStationScreen extends AbstractElementContainer
                     () -> true).
                     setLabelStackCount().
                     layout((screen, gui, parent, world) -> world.translateXY(gui));
-                this.jewel3.whenClicked(VaultJewelApplicationStationScreen.this.new MouseClickRunnable(123));
+                this.jewel3.whenClicked(JewelSelectorTableScreen.this.new MouseClickRunnable(123));
                 this.addElement(this.jewel3);
                 this.jewel3.setDisabled(() -> false);
 
@@ -467,11 +465,11 @@ public class VaultJewelApplicationStationScreen extends AbstractElementContainer
                 {
                     public boolean containsMouse(double x, double y)
                     {
-                        if (scrollMenuType == ScrollMenu.JEWEL && !VaultJewelApplicationStationScreen.this.jewelsElement.contains(x, y))
+                        if (scrollMenuType == ScrollMenu.JEWEL && !JewelSelectorTableScreen.this.jewelsElement.contains(x, y))
                         {
                             return false;
                         }
-                        else if (scrollMenuType == ScrollMenu.POUCH && !VaultJewelApplicationStationScreen.this.pouchesElement.contains(x, y))
+                        else if (scrollMenuType == ScrollMenu.POUCH && !JewelSelectorTableScreen.this.pouchesElement.contains(x, y))
                         {
                             return false;
                         }
@@ -599,7 +597,7 @@ public class VaultJewelApplicationStationScreen extends AbstractElementContainer
                             {
                                 return disabled;
                             });
-                    clickableSlot.whenClicked(VaultJewelApplicationStationScreen.this.new MouseClickRunnable(37 + i + (scrollMenuType == ScrollMenu.JEWEL ? 59 : 0)));
+                    clickableSlot.whenClicked(JewelSelectorTableScreen.this.new MouseClickRunnable(37 + i + (scrollMenuType == ScrollMenu.JEWEL ? 59 : 0)));
                     entry.adjustSlot(clickableSlot);
                     this.addElement(clickableSlot);
                     this.slots.add(clickableSlot);
@@ -662,7 +660,7 @@ public class VaultJewelApplicationStationScreen extends AbstractElementContainer
 
         public void run()
         {
-            VaultJewelApplicationStationScreen.this.mouseClicked(this.type, this.slot);
+            JewelSelectorTableScreen.this.mouseClicked(this.type, this.slot);
         }
     }
 
