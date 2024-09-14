@@ -1,8 +1,8 @@
-package lv.id.bonne.vaulthunters.jewelpacktable.network;
+package lv.id.bonne.vaulthunters.morevaulttables.network;
 
 
-import lv.id.bonne.vaulthunters.jewelpacktable.JewelPackTableMod;
-import lv.id.bonne.vaulthunters.jewelpacktable.network.packets.VaultJewelApplicationStationMessage;
+import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTableMod;
+import lv.id.bonne.vaulthunters.morevaulttables.network.packets.VaultJewelApplicationStationMessage;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
@@ -44,7 +44,7 @@ public class ModNetwork
     public static void register()
     {
         CHANNEL = NetworkRegistry.ChannelBuilder.
-            named(JewelPackTableMod.of("messages")).
+            named(MoreVaultTableMod.of("messages")).
             networkProtocolVersion(() -> PROTOCOL_VERSION).
             clientAcceptedVersions(PROTOCOL_VERSION::equals).
             serverAcceptedVersions(PROTOCOL_VERSION::equals).

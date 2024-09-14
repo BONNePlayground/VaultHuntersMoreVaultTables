@@ -1,12 +1,12 @@
-package lv.id.bonne.vaulthunters.jewelpacktable.block;
+package lv.id.bonne.vaulthunters.morevaulttables.block;
 
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import iskallia.vault.block.base.FacedBlock;
-import lv.id.bonne.vaulthunters.jewelpacktable.block.entity.JewelSelectorTable;
-import lv.id.bonne.vaulthunters.jewelpacktable.init.ModBlocks;
+import lv.id.bonne.vaulthunters.morevaulttables.block.entity.JewelSelectorTable;
+import lv.id.bonne.vaulthunters.morevaulttables.init.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Containers;

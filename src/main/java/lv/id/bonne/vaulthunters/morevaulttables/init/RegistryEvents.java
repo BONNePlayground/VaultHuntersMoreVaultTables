@@ -1,4 +1,4 @@
-package lv.id.bonne.vaulthunters.jewelpacktable.init;
+package lv.id.bonne.vaulthunters.morevaulttables.init;
 
 
 import net.minecraft.world.inventory.MenuType;

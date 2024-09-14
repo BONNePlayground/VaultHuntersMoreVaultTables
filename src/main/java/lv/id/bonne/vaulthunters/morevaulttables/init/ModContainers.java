@@ -4,10 +4,10 @@
 //
 
 
-package lv.id.bonne.vaulthunters.jewelpacktable.init;
+package lv.id.bonne.vaulthunters.morevaulttables.init;
 
 
-import lv.id.bonne.vaulthunters.jewelpacktable.block.menu.JewelSelectorTableContainer;
+import lv.id.bonne.vaulthunters.morevaulttables.block.menu.JewelSelectorTableContainer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.Level;

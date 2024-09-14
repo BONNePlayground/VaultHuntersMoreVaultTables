@@ -1,10 +1,10 @@
-package lv.id.bonne.vaulthunters.jewelpacktable.block.renderer;
+package lv.id.bonne.vaulthunters.morevaulttables.block.renderer;
 
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import javax.annotation.Nonnull;
-import lv.id.bonne.vaulthunters.jewelpacktable.block.entity.JewelSelectorTable;
+import lv.id.bonne.vaulthunters.morevaulttables.block.entity.JewelSelectorTable;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;

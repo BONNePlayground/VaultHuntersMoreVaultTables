@@ -4,7 +4,7 @@
 //
 
 
-package lv.id.bonne.vaulthunters.jewelpacktable.init;
+package lv.id.bonne.vaulthunters.morevaulttables.init;
 
 
 import java.util.*;
@@ -15,7 +15,7 @@ import iskallia.vault.client.atlas.ITextureAtlas;
 import iskallia.vault.client.atlas.ResourceTextureAtlasHolder;
 import iskallia.vault.util.function.Memo;
 import javax.annotation.Nullable;
-import lv.id.bonne.vaulthunters.jewelpacktable.JewelPackTableMod;
+import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTableMod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
@@ -35,8 +35,8 @@ import net.minecraftforge.fml.common.Mod;
 public class ModTextureAtlases {
     private static final Map<ResourceLocation, Supplier<ITextureAtlas>> REGISTRY = new HashMap<>();
 
-    public static final Supplier<ITextureAtlas> SLOT = register(JewelPackTableMod.of("textures/atlas/slot.png"),
-        JewelPackTableMod.of("textures/gui/slot"), null);
+    public static final Supplier<ITextureAtlas> SLOT = register(MoreVaultTableMod.of("textures/atlas/slot.png"),
+        MoreVaultTableMod.of("textures/gui/slot"), null);
 
 
     @SubscribeEvent

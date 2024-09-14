@@ -4,7 +4,7 @@
 //
 
 
-package lv.id.bonne.vaulthunters.jewelpacktable.mixin;
+package lv.id.bonne.vaulthunters.morevaulttables.mixin;
 
 
 import org.spongepowered.asm.mixin.Mixin;

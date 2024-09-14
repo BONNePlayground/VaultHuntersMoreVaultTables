@@ -1,4 +1,4 @@
-package lv.id.bonne.vaulthunters.jewelpacktable.block.screen;
+package lv.id.bonne.vaulthunters.morevaulttables.block.screen;
 
 
 import com.mojang.blaze3d.platform.InputConstants;
@@ -30,11 +30,11 @@ import iskallia.vault.skill.expertise.type.JewelExpertise;
 import iskallia.vault.skill.tree.ExpertiseTree;
 import iskallia.vault.world.data.PlayerExpertisesData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
-import lv.id.bonne.vaulthunters.jewelpacktable.JewelPackTableMod;
-import lv.id.bonne.vaulthunters.jewelpacktable.init.ModTextureAtlases;
+import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTableMod;
+import lv.id.bonne.vaulthunters.morevaulttables.init.ModTextureAtlases;
 import javax.annotation.Nullable;
-import lv.id.bonne.vaulthunters.jewelpacktable.block.menu.JewelSelectorTableContainer;
-import lv.id.bonne.vaulthunters.jewelpacktable.mixin.JewelPouchItemInvoker;
+import lv.id.bonne.vaulthunters.morevaulttables.block.menu.JewelSelectorTableContainer;
+import lv.id.bonne.vaulthunters.morevaulttables.mixin.JewelPouchItemInvoker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -681,5 +681,5 @@ public class VaultJewelApplicationStationScreen extends AbstractElementContainer
         POUCH
     }
 
-     public static final TextureAtlasRegion POUCH_NO_ITEM = TextureAtlasRegion.of(ModTextureAtlases.SLOT, JewelPackTableMod.of("gui/slot/pouch_no_item"));
+     public static final TextureAtlasRegion POUCH_NO_ITEM = TextureAtlasRegion.of(ModTextureAtlases.SLOT, MoreVaultTableMod.of("gui/slot/pouch_no_item"));
 }

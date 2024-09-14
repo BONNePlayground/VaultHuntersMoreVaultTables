@@ -4,7 +4,7 @@
 //
 
 
-package lv.id.bonne.vaulthunters.jewelpacktable.init;
+package lv.id.bonne.vaulthunters.morevaulttables.init;
 
 
 import com.google.common.base.Predicates;

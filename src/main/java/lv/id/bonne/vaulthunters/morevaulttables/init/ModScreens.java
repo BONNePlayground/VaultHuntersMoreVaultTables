@@ -1,7 +1,7 @@
-package lv.id.bonne.vaulthunters.jewelpacktable.init;
+package lv.id.bonne.vaulthunters.morevaulttables.init;
 
 
-import lv.id.bonne.vaulthunters.jewelpacktable.block.screen.VaultJewelApplicationStationScreen;
+import lv.id.bonne.vaulthunters.morevaulttables.block.screen.VaultJewelApplicationStationScreen;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;

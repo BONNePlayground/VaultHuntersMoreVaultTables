@@ -1,4 +1,4 @@
-package lv.id.bonne.vaulthunters.jewelpacktable.block.menu;
+package lv.id.bonne.vaulthunters.morevaulttables.block.menu;
 
 
 import org.jetbrains.annotations.NotNull;
@@ -7,8 +7,8 @@ import iskallia.vault.container.oversized.OverSizedSlotContainer;
 import iskallia.vault.container.slot.TabSlot;
 import iskallia.vault.item.JewelPouchItem;
 import iskallia.vault.item.tool.JewelItem;
-import lv.id.bonne.vaulthunters.jewelpacktable.block.entity.JewelSelectorTable;
-import lv.id.bonne.vaulthunters.jewelpacktable.init.ModContainers;
+import lv.id.bonne.vaulthunters.morevaulttables.block.entity.JewelSelectorTable;
+import lv.id.bonne.vaulthunters.morevaulttables.init.ModContainers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;

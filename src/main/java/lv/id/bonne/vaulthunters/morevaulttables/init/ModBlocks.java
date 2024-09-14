@@ -4,16 +4,16 @@
 //
 
 
-package lv.id.bonne.vaulthunters.jewelpacktable.init;
+package lv.id.bonne.vaulthunters.morevaulttables.init;
 
 
 import java.util.function.Consumer;
 
 import iskallia.vault.init.ModItems;
-import lv.id.bonne.vaulthunters.jewelpacktable.JewelPackTableMod;
-import lv.id.bonne.vaulthunters.jewelpacktable.block.JewelSelectorTableBlock;
-import lv.id.bonne.vaulthunters.jewelpacktable.block.entity.JewelSelectorTable;
-import lv.id.bonne.vaulthunters.jewelpacktable.block.renderer.JewelApplicationStationRenderer;
+import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTableMod;
+import lv.id.bonne.vaulthunters.morevaulttables.block.JewelSelectorTableBlock;
+import lv.id.bonne.vaulthunters.morevaulttables.block.entity.JewelSelectorTable;
+import lv.id.bonne.vaulthunters.morevaulttables.block.renderer.JewelApplicationStationRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DoubleHighBlockItem;
@@ -32,11 +32,11 @@ public class ModBlocks {
     public static final BlockEntityType<JewelSelectorTable> JEWEL_SELECTOR_TABLE;
 
     public static void registerBlocks(RegistryEvent.Register<Block> event) {
-        registerBlock(event, VAULT_JEWEL_APPLICATION_STATION, JewelPackTableMod.of("vault_jewel_application_station"));
+        registerBlock(event, VAULT_JEWEL_APPLICATION_STATION, MoreVaultTableMod.of("vault_jewel_application_station"));
     }
 
     public static void registerTileEntities(RegistryEvent.Register<BlockEntityType<?>> event) {
-        registerTileEntity(event, JEWEL_SELECTOR_TABLE, JewelPackTableMod.of("vault_jewel_application_station_tile_entity"));
+        registerTileEntity(event, JEWEL_SELECTOR_TABLE, MoreVaultTableMod.of("vault_jewel_application_station_tile_entity"));
     }
 
     public static void registerTileEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {

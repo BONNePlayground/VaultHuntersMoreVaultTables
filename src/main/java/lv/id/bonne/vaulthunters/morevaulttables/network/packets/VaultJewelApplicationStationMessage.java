@@ -4,12 +4,12 @@
 //
 
 
-package lv.id.bonne.vaulthunters.jewelpacktable.network.packets;
+package lv.id.bonne.vaulthunters.morevaulttables.network.packets;
 
 
 import java.util.function.Supplier;
 
-import lv.id.bonne.vaulthunters.jewelpacktable.block.menu.JewelSelectorTableContainer;
+import lv.id.bonne.vaulthunters.morevaulttables.block.menu.JewelSelectorTableContainer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;

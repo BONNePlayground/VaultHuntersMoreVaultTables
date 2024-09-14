@@ -1,4 +1,4 @@
-package lv.id.bonne.vaulthunters.jewelpacktable.block.entity;
+package lv.id.bonne.vaulthunters.morevaulttables.block.entity;
 
 
 import org.jetbrains.annotations.NotNull;
@@ -8,8 +8,8 @@ import java.util.List;
 
 import iskallia.vault.container.oversized.OverSizedInventory;
 import iskallia.vault.init.ModItems;
-import lv.id.bonne.vaulthunters.jewelpacktable.block.menu.JewelSelectorTableContainer;
-import lv.id.bonne.vaulthunters.jewelpacktable.init.ModBlocks;
+import lv.id.bonne.vaulthunters.morevaulttables.block.menu.JewelSelectorTableContainer;
+import lv.id.bonne.vaulthunters.morevaulttables.init.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
