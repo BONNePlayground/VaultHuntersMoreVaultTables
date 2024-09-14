@@ -30,8 +30,9 @@ import iskallia.vault.skill.expertise.type.JewelExpertise;
 import iskallia.vault.skill.tree.ExpertiseTree;
 import iskallia.vault.world.data.PlayerExpertisesData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
-import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTableMod;
-import lv.id.bonne.vaulthunters.morevaulttables.init.ModTextureAtlases;
+import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTablesMod;
+import lv.id.bonne.vaulthunters.morevaulttables.init.MoreVaultTablesReferences;
+import lv.id.bonne.vaulthunters.morevaulttables.init.MoreVaultTablesTextureAtlases;
 import javax.annotation.Nullable;
 import lv.id.bonne.vaulthunters.morevaulttables.block.menu.JewelSelectorTableContainer;
 import lv.id.bonne.vaulthunters.morevaulttables.mixin.JewelPouchItemInvoker;
@@ -145,87 +146,106 @@ public class VaultJewelApplicationStationScreen extends AbstractElementContainer
                 height(titleElement.height() + 10));
 
         // Middle screen element
-        if (container.getTileEntity() != null) {
+        if (container.getTileEntity() != null)
+        {
             ItemStack stack = container.getTileEntity().getSelectedPouch();
 
             if (stack.getOrCreateTag().isEmpty())
             {
-                ServerPlayer sPlayer = (ServerPlayer) container.getPlayer();
+                if (container.getPlayer() instanceof ServerPlayer serverPlayer)
+                {
+                    int vaultLevel = JewelPouchItem.getStoredLevel(stack).orElseGet(() ->
+                        PlayerVaultStatsData.get(serverPlayer.getLevel()).getVaultStats(serverPlayer).getVaultLevel());
 
-                int vaultLevel = JewelPouchItem.getStoredLevel(stack).orElseGet(() ->
-                    PlayerVaultStatsData.get(sPlayer.getLevel()).getVaultStats(sPlayer).getVaultLevel());
+                    int additionalIdentifiedJewels = 0;
+                    ExpertiseTree expertises =
+                        PlayerExpertisesData.get(serverPlayer.getLevel()).getExpertises(serverPlayer);
 
-                int additionalIdentifiedJewels = 0;
-                ExpertiseTree expertises = PlayerExpertisesData.get(sPlayer.getLevel()).getExpertises(sPlayer);
+                    JewelExpertise expertise;
+                    for (Iterator<?> var10 = expertises.getAll(JewelExpertise.class, Skill::isUnlocked).iterator();
+                        var10.hasNext(); additionalIdentifiedJewels += expertise.getAdditionalIdentifiedJewels())
+                    {
+                        expertise = (JewelExpertise) var10.next();
+                    }
 
-                JewelExpertise expertise;
-                for(Iterator<?> var10 = expertises.getAll(JewelExpertise.class, Skill::isUnlocked).iterator(); var10.hasNext(); additionalIdentifiedJewels += expertise.getAdditionalIdentifiedJewels()) {
-                    expertise = (JewelExpertise)var10.next();
+                    JewelPouchItemInvoker.invokeGenerateJewels(stack, vaultLevel, additionalIdentifiedJewels);
                 }
-
-                JewelPouchItemInvoker.invokeGenerateJewels(stack, vaultLevel, additionalIdentifiedJewels);
             }
 
             List<JewelPouchItem.RolledJewel> rolledJewels = JewelPouchItem.getJewels(stack);
 
-            this.jewel1 = new SelectableFakeItemSlotElement<>(Spatials.positionXY(125, 16), () -> rolledJewels.get(0).stack(), () -> true).
-                setLabelStackCount().
-                layout((screen, gui, parent, world) -> world.translateXY(gui));
-            this.jewel1.whenClicked(VaultJewelApplicationStationScreen.this.new MouseClickRunnable(121));
-            this.addElement(this.jewel1);
-            this.jewel1.setDisabled(() -> false);
+//            if (!rolledJewels.isEmpty())
+            {
+                this.jewel1 = new SelectableFakeItemSlotElement<>(Spatials.positionXY(125, 16),
+                    () -> rolledJewels.isEmpty() ? ItemStack.EMPTY : rolledJewels.get(0).stack(),
+                    () -> true).
+                    setLabelStackCount().
+                    layout((screen, gui, parent, world) -> world.translateXY(gui));
+                this.jewel1.whenClicked(VaultJewelApplicationStationScreen.this.new MouseClickRunnable(121));
+                this.addElement(this.jewel1);
+                this.jewel1.setDisabled(() -> false);
 
-            this.addElement(new NineSliceElement<>(this.jewel1.getWorldSpatial(), ScreenTextures.DEFAULT_WINDOW_BACKGROUND)).
-                layout((screen, gui, parent, world) -> {
-                    world.translateXY(gui).
-                        translateZ(-1).
-                        translateX(-5).
-                        translateY(-5).
-                        translateZ(-10).
-                        width(this.jewel1.width() + 10).
-                        height(this.jewel1.height() + 10);
-            });
-
-
-            this.jewel2 = new SelectableFakeItemSlotElement<>(Spatials.positionXY(125, 32), () -> rolledJewels.get(1).stack(), () -> true).
-                setLabelStackCount().
-                layout((screen, gui, parent, world) -> world.translateXY(gui));
-            this.jewel2.whenClicked(VaultJewelApplicationStationScreen.this.new MouseClickRunnable(122));
-            this.addElement(this.jewel2);
-            this.jewel2.setDisabled(() -> false);
+                this.addElement(new NineSliceElement<>(this.jewel1.getWorldSpatial(),
+                        ScreenTextures.DEFAULT_WINDOW_BACKGROUND)).
+                    layout((screen, gui, parent, world) ->
+                    {
+                        world.translateXY(gui).
+                            translateZ(-1).
+                            translateX(-5).
+                            translateY(-5).
+                            translateZ(-10).
+                            width(this.jewel1.width() + 10).
+                            height(this.jewel1.height() + 10);
+                    });
 
 
-            this.addElement(new NineSliceElement<>(this.jewel2.getWorldSpatial(), ScreenTextures.DEFAULT_WINDOW_BACKGROUND)).
-                layout((screen, gui, parent, world) -> {
-                    world.translateXY(gui).
-                        translateZ(-1).
-                        translateX(-5).
-                        translateY(-5).
-                        translateZ(-10).
-                        width(this.jewel2.width() + 10).
-                        height(this.jewel2.height() + 10);
-                });
-
-            this.jewel3 = new SelectableFakeItemSlotElement<>(Spatials.positionXY(125, 48), () -> rolledJewels.get(2).stack(), () -> true).
-                setLabelStackCount().
-                layout((screen, gui, parent, world) -> world.translateXY(gui));
-            this.jewel3.whenClicked(VaultJewelApplicationStationScreen.this.new MouseClickRunnable(123));
-            this.addElement(this.jewel3);
-            this.jewel3.setDisabled(() -> false);
-
-            this.addElement(new NineSliceElement<>(this.jewel3.getWorldSpatial(), ScreenTextures.DEFAULT_WINDOW_BACKGROUND)).
-                layout((screen, gui, parent, world) -> {
-                    world.translateXY(gui).
-                        translateZ(-1).
-                        translateX(-5).
-                        translateY(-5).
-                        translateZ(-10).
-                        width(this.jewel3.width() + 10).
-                        height(this.jewel3.height() + 10);
-                });
+                this.jewel2 = new SelectableFakeItemSlotElement<>(Spatials.positionXY(125, 32),
+                    () -> rolledJewels.isEmpty() ? ItemStack.EMPTY : rolledJewels.get(1).stack(),
+                    () -> true).
+                    setLabelStackCount().
+                    layout((screen, gui, parent, world) -> world.translateXY(gui));
+                this.jewel2.whenClicked(VaultJewelApplicationStationScreen.this.new MouseClickRunnable(122));
+                this.addElement(this.jewel2);
+                this.jewel2.setDisabled(() -> false);
 
 
-            int a = 0;
+                this.addElement(new NineSliceElement<>(this.jewel2.getWorldSpatial(),
+                        ScreenTextures.DEFAULT_WINDOW_BACKGROUND)).
+                    layout((screen, gui, parent, world) ->
+                    {
+                        world.translateXY(gui).
+                            translateZ(-1).
+                            translateX(-5).
+                            translateY(-5).
+                            translateZ(-10).
+                            width(this.jewel2.width() + 10).
+                            height(this.jewel2.height() + 10);
+                    });
+
+                this.jewel3 = new SelectableFakeItemSlotElement<>(Spatials.positionXY(125, 48),
+                    () -> rolledJewels.isEmpty() ? ItemStack.EMPTY : rolledJewels.get(2).stack(),
+                    () -> true).
+                    setLabelStackCount().
+                    layout((screen, gui, parent, world) -> world.translateXY(gui));
+                this.jewel3.whenClicked(VaultJewelApplicationStationScreen.this.new MouseClickRunnable(123));
+                this.addElement(this.jewel3);
+                this.jewel3.setDisabled(() -> false);
+
+                this.addElement(new NineSliceElement<>(this.jewel3.getWorldSpatial(),
+                        ScreenTextures.DEFAULT_WINDOW_BACKGROUND)).
+                    layout((screen, gui, parent, world) ->
+                    {
+                        world.translateXY(gui).
+                            translateZ(-1).
+                            translateX(-5).
+                            translateY(-5).
+                            translateZ(-10).
+                            width(this.jewel3.width() + 10).
+                            height(this.jewel3.height() + 10);
+                    });
+
+
+                int a = 0;
 //            this.stackElement = new ToolItemSlotElement(Spatials.positionXY(122, 24), () -> {
 //                return stack;
 //            }, () -> {
@@ -234,6 +254,7 @@ public class VaultJewelApplicationStationScreen extends AbstractElementContainer
 //                world.translateXY(gui);
 //            });
 //            this.addElement(this.stackElement);
+            }
         }
     }
 
@@ -460,7 +481,7 @@ public class VaultJewelApplicationStationScreen extends AbstractElementContainer
                                 y < (double) this.bottom();
                         }
                     }
-                }).overlayTexture(scrollMenuType == ScrollMenu.JEWEL ? ScreenTextures.JEWEL_NO_ITEM : POUCH_NO_ITEM);
+                }).overlayTexture(scrollMenuType == ScrollMenu.JEWEL ? ScreenTextures.JEWEL_NO_ITEM : MoreVaultTablesTextureAtlases.POUCH_NO_ITEM);
         }
 
 
@@ -680,6 +701,4 @@ public class VaultJewelApplicationStationScreen extends AbstractElementContainer
         JEWEL,
         POUCH
     }
-
-     public static final TextureAtlasRegion POUCH_NO_ITEM = TextureAtlasRegion.of(ModTextureAtlases.SLOT, MoreVaultTableMod.of("gui/slot/pouch_no_item"));
 }

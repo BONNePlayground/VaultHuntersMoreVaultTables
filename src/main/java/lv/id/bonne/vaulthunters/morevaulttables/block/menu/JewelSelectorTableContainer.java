@@ -7,8 +7,8 @@ import iskallia.vault.container.oversized.OverSizedSlotContainer;
 import iskallia.vault.container.slot.TabSlot;
 import iskallia.vault.item.JewelPouchItem;
 import iskallia.vault.item.tool.JewelItem;
-import lv.id.bonne.vaulthunters.morevaulttables.block.entity.JewelSelectorTable;
-import lv.id.bonne.vaulthunters.morevaulttables.init.ModContainers;
+import lv.id.bonne.vaulthunters.morevaulttables.block.entity.JewelSelectorTableTileEntity;
+import lv.id.bonne.vaulthunters.morevaulttables.init.MoreVaultTablesReferences;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
@@ -34,11 +34,11 @@ public class JewelSelectorTableContainer extends OverSizedSlotContainer
      */
     public JewelSelectorTableContainer(int windowId, Level world, BlockPos pos, Inventory playerInventory)
     {
-        super(ModContainers.JEWEL_SELECTOR_TABLE_CONTAINER, windowId, playerInventory.player);
+        super(MoreVaultTablesReferences.JEWEL_SELECTOR_TABLE_CONTAINER, windowId, playerInventory.player);
         this.tilePos = pos;
         BlockEntity tile = world.getBlockEntity(this.tilePos);
 
-        if (tile instanceof JewelSelectorTable craftingStationTileEntity)
+        if (tile instanceof JewelSelectorTableTileEntity craftingStationTileEntity)
         {
             this.tileEntity = craftingStationTileEntity;
             this.initSlots(playerInventory);
@@ -194,7 +194,7 @@ public class JewelSelectorTableContainer extends OverSizedSlotContainer
      *
      * @return the tile entity
      */
-    public JewelSelectorTable getTileEntity()
+    public JewelSelectorTableTileEntity getTileEntity()
     {
         return this.tileEntity;
     }
@@ -215,7 +215,7 @@ public class JewelSelectorTableContainer extends OverSizedSlotContainer
     /**
      * The tile entity that is selected.
      */
-    private final JewelSelectorTable tileEntity;
+    private final JewelSelectorTableTileEntity tileEntity;
 
     /**
      * The title pos for container.

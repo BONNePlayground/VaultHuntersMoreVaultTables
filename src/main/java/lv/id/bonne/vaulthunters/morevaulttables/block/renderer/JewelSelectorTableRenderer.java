@@ -4,18 +4,18 @@ package lv.id.bonne.vaulthunters.morevaulttables.block.renderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import javax.annotation.Nonnull;
-import lv.id.bonne.vaulthunters.morevaulttables.block.entity.JewelSelectorTable;
+import lv.id.bonne.vaulthunters.morevaulttables.block.entity.JewelSelectorTableTileEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 
 
-public class JewelApplicationStationRenderer implements BlockEntityRenderer<JewelSelectorTable>
+public class JewelSelectorTableRenderer implements BlockEntityRenderer<JewelSelectorTableTileEntity>
 {
-  public JewelApplicationStationRenderer(BlockEntityRendererProvider.Context context) {
+  public JewelSelectorTableRenderer(BlockEntityRendererProvider.Context context) {
   }
 
-  public void render(JewelSelectorTable tile, float partialTicks, @Nonnull PoseStack poseStack, @Nonnull MultiBufferSource bufferIn, int combinedLightIn, int combinedOverlayIn) {
+  public void render(JewelSelectorTableTileEntity tile, float partialTicks, @Nonnull PoseStack poseStack, @Nonnull MultiBufferSource bufferIn, int combinedLightIn, int combinedOverlayIn) {
 //    ItemStack tool = tile.getRenderedTool();
 //    if (!tool.isEmpty()) {
 //      poseStack.pushPose();

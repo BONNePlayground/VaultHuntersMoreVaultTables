@@ -5,8 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import iskallia.vault.block.base.FacedBlock;
-import lv.id.bonne.vaulthunters.morevaulttables.block.entity.JewelSelectorTable;
-import lv.id.bonne.vaulthunters.morevaulttables.init.ModBlocks;
+import lv.id.bonne.vaulthunters.morevaulttables.block.entity.JewelSelectorTableTileEntity;
+import lv.id.bonne.vaulthunters.morevaulttables.init.MoreVaultTablesReferences;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Containers;
@@ -15,15 +15,12 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.NetworkHooks;
 
@@ -36,9 +33,9 @@ public class JewelSelectorTableBlock extends FacedBlock implements EntityBlock
     /**
      * Instantiates a new Jewel selector table block.
      */
-    public JewelSelectorTableBlock()
-    {
-        super(Properties.of(Material.STONE).strength(0.5F).noOcclusion());
+    public JewelSelectorTableBlock(Properties properties, VoxelShape shape) {
+        super(properties);
+        SHAPE = shape;
     }
 
 
@@ -88,7 +85,7 @@ public class JewelSelectorTableBlock extends FacedBlock implements EntityBlock
         {
             BlockEntity tile = level.getBlockEntity(pos);
 
-            if (tile instanceof JewelSelectorTable vaultJewelApplicationStationTile)
+            if (tile instanceof JewelSelectorTableTileEntity vaultJewelApplicationStationTile)
             {
                 NetworkHooks.openGui(serverPlayer, vaultJewelApplicationStationTile, buffer -> buffer.writeBlockPos(pos));
                 return InteractionResult.SUCCESS;
@@ -135,9 +132,9 @@ public class JewelSelectorTableBlock extends FacedBlock implements EntityBlock
         {
             BlockEntity tile = level.getBlockEntity(pos);
 
-            if (tile instanceof JewelSelectorTable)
+            if (tile instanceof JewelSelectorTableTileEntity)
             {
-                JewelSelectorTable applicationStation = (JewelSelectorTable) tile;
+                JewelSelectorTableTileEntity applicationStation = (JewelSelectorTableTileEntity) tile;
                 applicationStation.getInputInventory().getOverSizedContents().forEach((overSizedStack) ->
                 {
                     overSizedStack.splitByStackSize().forEach((splitStack) ->
@@ -181,13 +178,12 @@ public class JewelSelectorTableBlock extends FacedBlock implements EntityBlock
     @Nullable
     public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state)
     {
-        return ModBlocks.JEWEL_SELECTOR_TABLE.create(pos, state);
+        return MoreVaultTablesReferences.JEWEL_SELECTOR_TABLE_TILE_ENTITY.create(pos, state);
     }
+
 
     /**
      * The constant SHAPE.
      */
-    public static VoxelShape SHAPE = Shapes.or(
-        Block.box(1.0, 10.0, 1.0, 15.0, 12.0, 15.0),
-        Block.box(2.0, 0.0, 2.0, 14.0, 10.0, 14.0));
+    private final VoxelShape SHAPE;
 }

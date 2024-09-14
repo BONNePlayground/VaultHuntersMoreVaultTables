@@ -1,7 +1,7 @@
 package lv.id.bonne.vaulthunters.morevaulttables.network;
 
 
-import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTableMod;
+import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTablesMod;
 import lv.id.bonne.vaulthunters.morevaulttables.network.packets.VaultJewelApplicationStationMessage;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkDirection;
@@ -14,7 +14,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
  * This class manages the network channel for this mod.
  * It is used to register and send pockets between the client and server.
  */
-public class ModNetwork
+public class MoreVaultTablesNetwork
 {
     /**
      * The protocol version for the mod. We start with 1.
@@ -44,7 +44,7 @@ public class ModNetwork
     public static void register()
     {
         CHANNEL = NetworkRegistry.ChannelBuilder.
-            named(MoreVaultTableMod.of("messages")).
+            named(MoreVaultTablesMod.of("messages")).
             networkProtocolVersion(() -> PROTOCOL_VERSION).
             clientAcceptedVersions(PROTOCOL_VERSION::equals).
             serverAcceptedVersions(PROTOCOL_VERSION::equals).

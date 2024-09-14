@@ -1,3 +1,4 @@
 {
-  "gui.jewelpacktable.table.title": "Jewel Pack Table"
+  "block.morevaulttables.jewel_selector_table_block": "Jewel Selector Table Block",
+  "container.morevaulttables.jewel_selector_table_tile_entity": "Jewel Selector Table"
 }

@@ -9,7 +9,7 @@ import java.util.List;
 import iskallia.vault.container.oversized.OverSizedInventory;
 import iskallia.vault.init.ModItems;
 import lv.id.bonne.vaulthunters.morevaulttables.block.menu.JewelSelectorTableContainer;
-import lv.id.bonne.vaulthunters.morevaulttables.init.ModBlocks;
+import lv.id.bonne.vaulthunters.morevaulttables.init.MoreVaultTablesReferences;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -28,7 +28,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * The Jewel selector table allows to unpack Jewel Packs in single workstation without
  * using right-click menu.
  */
-public class JewelSelectorTable extends BlockEntity implements MenuProvider
+public class JewelSelectorTableTileEntity extends BlockEntity implements MenuProvider
 {
 
     /**
@@ -37,9 +37,9 @@ public class JewelSelectorTable extends BlockEntity implements MenuProvider
      * @param pos the pos
      * @param state the state
      */
-    public JewelSelectorTable(BlockPos pos, BlockState state)
+    public JewelSelectorTableTileEntity(BlockPos pos, BlockState state)
     {
-        super(ModBlocks.JEWEL_SELECTOR_TABLE, pos, state);
+        super(MoreVaultTablesReferences.JEWEL_SELECTOR_TABLE_TILE_ENTITY, pos, state);
     }
 
 
@@ -272,7 +272,7 @@ public class JewelSelectorTable extends BlockEntity implements MenuProvider
         public void setChanged()
         {
             super.setChanged();
-            JewelSelectorTable.this.totalSizeInJewels = this.countItem(ModItems.JEWEL);
+            JewelSelectorTableTileEntity.this.totalSizeInJewels = this.countItem(ModItems.JEWEL);
         }
     };
 
@@ -293,13 +293,13 @@ public class JewelSelectorTable extends BlockEntity implements MenuProvider
         {
             super.setChanged();
 
-            JewelSelectorTable.this.totalSizeInPouches = 0;
+            JewelSelectorTableTileEntity.this.totalSizeInPouches = 0;
 
             for (int i = 1; i < 60; i++)
             {
                 if (this.getItem(i).is(ModItems.JEWEL_POUCH))
                 {
-                    JewelSelectorTable.this.totalSizeInJewels++;
+                    JewelSelectorTableTileEntity.this.totalSizeInJewels++;
                 }
             }
         }
