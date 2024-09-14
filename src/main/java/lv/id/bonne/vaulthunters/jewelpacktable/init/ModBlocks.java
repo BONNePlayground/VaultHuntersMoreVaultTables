@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 
 import iskallia.vault.init.ModItems;
 import lv.id.bonne.vaulthunters.jewelpacktable.JewelPackTableMod;
-import lv.id.bonne.vaulthunters.jewelpacktable.block.VaultJewelApplicationStationBlock;
+import lv.id.bonne.vaulthunters.jewelpacktable.block.JewelSelectorTableBlock;
 import lv.id.bonne.vaulthunters.jewelpacktable.block.entity.JewelSelectorTable;
 import lv.id.bonne.vaulthunters.jewelpacktable.block.renderer.JewelApplicationStationRenderer;
 import net.minecraft.resources.ResourceLocation;
@@ -27,7 +27,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType.Builder;
 import com.mojang.datafixers.types.Type;
 
 public class ModBlocks {
-    public static final VaultJewelApplicationStationBlock VAULT_JEWEL_APPLICATION_STATION;
+    public static final JewelSelectorTableBlock VAULT_JEWEL_APPLICATION_STATION;
 
     public static final BlockEntityType<JewelSelectorTable> JEWEL_SELECTOR_TABLE;
 
@@ -84,7 +84,7 @@ public class ModBlocks {
     }
 
     static {
-        VAULT_JEWEL_APPLICATION_STATION = new VaultJewelApplicationStationBlock();
+        VAULT_JEWEL_APPLICATION_STATION = new JewelSelectorTableBlock();
         JEWEL_SELECTOR_TABLE = Builder.of(JewelSelectorTable::new,
             new Block[]{VAULT_JEWEL_APPLICATION_STATION}).
             build((Type) null);
