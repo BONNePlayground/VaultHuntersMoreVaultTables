@@ -8,6 +8,7 @@ import java.util.List;
 
 import iskallia.vault.container.oversized.OverSizedInventory;
 import iskallia.vault.container.oversized.OverSizedSlotContainer;
+import iskallia.vault.container.oversized.OverSizedTabSlot;
 import iskallia.vault.container.slot.TabSlot;
 import iskallia.vault.item.JewelPouchItem;
 import iskallia.vault.item.tool.JewelItem;
@@ -111,9 +112,9 @@ public class JewelSelectorTableContainer extends OverSizedSlotContainer
                         screen.setRegenerate();
                     }
                 }
-                else if (JewelSelectorTableContainer.this.player instanceof ServerPlayer player)
+                else if (JewelSelectorTableContainer.this.player instanceof ServerPlayer serverPlayer)
                 {
-                    JewelSelectorTableContainer.this.identifyPouchItem(player);
+                    JewelSelectorTableContainer.this.identifyPouchItem(serverPlayer);
                 }
             }
         });
@@ -123,7 +124,7 @@ public class JewelSelectorTableContainer extends OverSizedSlotContainer
             for (int j = 0; j < 3; ++j)
             {
                 // Init slots somewhere far so they are not displayed.
-                this.addSlot(new TabSlot(invContainer, i * 3 + j + 1, -999 + j * 18, 50 + (i + 1) * 18)
+                this.addSlot(new OverSizedTabSlot(invContainer, i * 3 + j + 1, -999 + j * 18, 50 + (i + 1) * 18)
                 {
                     public boolean mayPlace(@NotNull ItemStack stack)
                     {

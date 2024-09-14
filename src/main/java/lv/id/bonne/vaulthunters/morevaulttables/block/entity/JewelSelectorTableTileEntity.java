@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import iskallia.vault.container.oversized.OverSizedInventory;
+import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.init.ModItems;
 import lv.id.bonne.vaulthunters.morevaulttables.block.menu.JewelSelectorTableContainer;
 import lv.id.bonne.vaulthunters.morevaulttables.init.MoreVaultTablesReferences;
