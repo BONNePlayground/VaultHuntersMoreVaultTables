@@ -4,7 +4,7 @@ import iskallia.vault.container.oversized.OverSizedSlotContainer;
 import iskallia.vault.container.slot.TabSlot;
 import iskallia.vault.item.JewelPouchItem;
 import iskallia.vault.item.tool.JewelItem;
-import lv.id.bonne.vaulthunters.jewelpacktable.block.entity.VaultJewelApplicationStationTileEntity;
+import lv.id.bonne.vaulthunters.jewelpacktable.block.entity.JewelSelectorTable;
 import lv.id.bonne.vaulthunters.jewelpacktable.init.ModContainers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.Container;
@@ -17,14 +17,14 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 
 public class VaultJewelApplicationStationContainer extends OverSizedSlotContainer {
-  private final VaultJewelApplicationStationTileEntity tileEntity;
+  private final JewelSelectorTable tileEntity;
   private final BlockPos tilePos;
 
   public VaultJewelApplicationStationContainer(int windowId, Level world, BlockPos pos, Inventory playerInventory) {
     super(ModContainers.VAULT_JEWEL_APPLICATION_STATION_CONTAINER, windowId, playerInventory.player);
     this.tilePos = pos;
     BlockEntity tile = world.getBlockEntity(this.tilePos);
-    if (tile instanceof VaultJewelApplicationStationTileEntity craftingStationTileEntity) {
+    if (tile instanceof JewelSelectorTable craftingStationTileEntity) {
       this.tileEntity = craftingStationTileEntity;
       this.initSlots(playerInventory);
     } else {
@@ -118,7 +118,7 @@ public class VaultJewelApplicationStationContainer extends OverSizedSlotContaine
     return this.tilePos;
   }
 
-  public VaultJewelApplicationStationTileEntity getTileEntity() {
+  public JewelSelectorTable getTileEntity() {
     return this.tileEntity;
   }
 

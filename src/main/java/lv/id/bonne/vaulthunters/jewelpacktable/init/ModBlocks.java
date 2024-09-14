@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 import iskallia.vault.init.ModItems;
 import lv.id.bonne.vaulthunters.jewelpacktable.JewelPackTableMod;
 import lv.id.bonne.vaulthunters.jewelpacktable.block.VaultJewelApplicationStationBlock;
-import lv.id.bonne.vaulthunters.jewelpacktable.block.entity.VaultJewelApplicationStationTileEntity;
+import lv.id.bonne.vaulthunters.jewelpacktable.block.entity.JewelSelectorTable;
 import lv.id.bonne.vaulthunters.jewelpacktable.block.renderer.JewelApplicationStationRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
@@ -29,18 +29,18 @@ import com.mojang.datafixers.types.Type;
 public class ModBlocks {
     public static final VaultJewelApplicationStationBlock VAULT_JEWEL_APPLICATION_STATION;
 
-    public static final BlockEntityType<VaultJewelApplicationStationTileEntity> VAULT_JEWEL_APPLICATION_STATION_ENTITY;
+    public static final BlockEntityType<JewelSelectorTable> JEWEL_SELECTOR_TABLE;
 
     public static void registerBlocks(RegistryEvent.Register<Block> event) {
         registerBlock(event, VAULT_JEWEL_APPLICATION_STATION, JewelPackTableMod.of("vault_jewel_application_station"));
     }
 
     public static void registerTileEntities(RegistryEvent.Register<BlockEntityType<?>> event) {
-        registerTileEntity(event, VAULT_JEWEL_APPLICATION_STATION_ENTITY, JewelPackTableMod.of("vault_jewel_application_station_tile_entity"));
+        registerTileEntity(event, JEWEL_SELECTOR_TABLE, JewelPackTableMod.of("vault_jewel_application_station_tile_entity"));
     }
 
     public static void registerTileEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerBlockEntityRenderer(VAULT_JEWEL_APPLICATION_STATION_ENTITY, JewelApplicationStationRenderer::new);
+        event.registerBlockEntityRenderer(JEWEL_SELECTOR_TABLE, JewelApplicationStationRenderer::new);
     }
 
     public static void registerBlockItems(RegistryEvent.Register<Item> event) {
@@ -85,7 +85,7 @@ public class ModBlocks {
 
     static {
         VAULT_JEWEL_APPLICATION_STATION = new VaultJewelApplicationStationBlock();
-        VAULT_JEWEL_APPLICATION_STATION_ENTITY = Builder.of(VaultJewelApplicationStationTileEntity::new,
+        JEWEL_SELECTOR_TABLE = Builder.of(JewelSelectorTable::new,
             new Block[]{VAULT_JEWEL_APPLICATION_STATION}).
             build((Type) null);
     }

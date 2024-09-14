@@ -4,7 +4,7 @@ import org.jetbrains.annotations.Nullable;
 
 import iskallia.vault.block.base.FacedBlock;
 import javax.annotation.Nonnull;
-import lv.id.bonne.vaulthunters.jewelpacktable.block.entity.VaultJewelApplicationStationTileEntity;
+import lv.id.bonne.vaulthunters.jewelpacktable.block.entity.JewelSelectorTable;
 import lv.id.bonne.vaulthunters.jewelpacktable.init.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
@@ -45,8 +45,8 @@ public class VaultJewelApplicationStationBlock extends FacedBlock implements Ent
     } else if (player instanceof ServerPlayer) {
       ServerPlayer sPlayer = (ServerPlayer)player;
       BlockEntity tile = level.getBlockEntity(pos);
-      if (tile instanceof VaultJewelApplicationStationTileEntity) {
-        VaultJewelApplicationStationTileEntity vaultJewelApplicationStationTile = (VaultJewelApplicationStationTileEntity)tile;
+      if (tile instanceof JewelSelectorTable) {
+        JewelSelectorTable vaultJewelApplicationStationTile = (JewelSelectorTable)tile;
         NetworkHooks.openGui(sPlayer, vaultJewelApplicationStationTile, (buffer) -> {
           buffer.writeBlockPos(pos);
         });
@@ -66,8 +66,8 @@ public class VaultJewelApplicationStationBlock extends FacedBlock implements Ent
   public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
     if (!state.is(newState.getBlock())) {
       BlockEntity tile = level.getBlockEntity(pos);
-      if (tile instanceof VaultJewelApplicationStationTileEntity) {
-        VaultJewelApplicationStationTileEntity applicationStation = (VaultJewelApplicationStationTileEntity)tile;
+      if (tile instanceof JewelSelectorTable) {
+        JewelSelectorTable applicationStation = (JewelSelectorTable)tile;
         applicationStation.getInputInventory().getOverSizedContents().forEach((overSizedStack) -> {
           overSizedStack.splitByStackSize().forEach((splitStack) -> {
             Containers.dropItemStack(level, (double)pos.getX(), (double)pos.getY(), (double)pos.getZ(), splitStack);
@@ -91,6 +91,6 @@ public class VaultJewelApplicationStationBlock extends FacedBlock implements Ent
 
   @Nullable
   public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-    return ModBlocks.VAULT_JEWEL_APPLICATION_STATION_ENTITY.create(pos, state);
+    return ModBlocks.JEWEL_SELECTOR_TABLE.create(pos, state);
   }
 }

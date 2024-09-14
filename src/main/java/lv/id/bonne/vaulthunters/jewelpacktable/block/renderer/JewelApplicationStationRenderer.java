@@ -2,26 +2,20 @@ package lv.id.bonne.vaulthunters.jewelpacktable.block.renderer;
 
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
 
-import iskallia.vault.block.ToolStationBlock;
 import javax.annotation.Nonnull;
-import lv.id.bonne.vaulthunters.jewelpacktable.block.entity.VaultJewelApplicationStationTileEntity;
-import net.minecraft.client.Minecraft;
+import lv.id.bonne.vaulthunters.jewelpacktable.block.entity.JewelSelectorTable;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.core.Direction;
-import net.minecraft.world.item.ItemStack;
 
 
-public class JewelApplicationStationRenderer implements BlockEntityRenderer<VaultJewelApplicationStationTileEntity>
+public class JewelApplicationStationRenderer implements BlockEntityRenderer<JewelSelectorTable>
 {
   public JewelApplicationStationRenderer(BlockEntityRendererProvider.Context context) {
   }
 
-  public void render(VaultJewelApplicationStationTileEntity tile, float partialTicks, @Nonnull PoseStack poseStack, @Nonnull MultiBufferSource bufferIn, int combinedLightIn, int combinedOverlayIn) {
+  public void render(JewelSelectorTable tile, float partialTicks, @Nonnull PoseStack poseStack, @Nonnull MultiBufferSource bufferIn, int combinedLightIn, int combinedOverlayIn) {
 //    ItemStack tool = tile.getRenderedTool();
 //    if (!tool.isEmpty()) {
 //      poseStack.pushPose();
