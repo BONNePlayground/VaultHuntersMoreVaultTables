@@ -24,14 +24,20 @@ import net.minecraft.world.level.block.state.BlockState;
 
 
 public class VaultJewelApplicationStationTileEntity extends BlockEntity implements MenuProvider {
+
+    public ItemStack getSelectedPouch() {
+        return this.inputInventory.getItem(0);
+    }
+
+
     private int totalSizeInJewels = 0;
     private int totalSizeInPouches = 0;
 
-    private final OverSizedInventory inputInventory = new OverSizedInventory(60, this) {
+    private final OverSizedInventory inputInventory = new OverSizedInventory(61, this) {
         public void setChanged() {
             super.setChanged();
 
-            VaultJewelApplicationStationTileEntity.this.totalSizeInJewels = 0;
+            VaultJewelApplicationStationTileEntity.this.totalSizeInPouches = 0;
 
             for(int i = 0; i < 60; ++i) {
                 // slot change ???
@@ -80,7 +86,7 @@ public class VaultJewelApplicationStationTileEntity extends BlockEntity implemen
 
     public ItemStack getPouchItem(int i) {
         i = Mth.clamp(i, 0, 60);
-        return this.inputInventory.getItem(i);
+        return this.inputInventory.getItem(i + 1);
     }
 
 
@@ -105,7 +111,7 @@ public class VaultJewelApplicationStationTileEntity extends BlockEntity implemen
         List<ItemStack> stacks = new ArrayList<>();
 
         for(int i = 0; i < 60; ++i) {
-            stacks.add(this.inputInventory.getItem(i));
+            stacks.add(this.inputInventory.getItem(i + 1));
         }
 
         return stacks;
