@@ -7,7 +7,6 @@
 package lv.id.bonne.vaulthunters.morevaulttables.init;
 
 
-import iskallia.vault.client.atlas.TextureAtlasRegion;
 import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTablesMod;
 import lv.id.bonne.vaulthunters.morevaulttables.block.entity.JewelSelectorTableTileEntity;
 import lv.id.bonne.vaulthunters.morevaulttables.block.menu.JewelSelectorTableContainer;

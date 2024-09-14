@@ -3,13 +3,28 @@ package lv.id.bonne.vaulthunters.morevaulttables.block.menu;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Iterator;
+import java.util.List;
+
+import iskallia.vault.container.oversized.OverSizedInventory;
 import iskallia.vault.container.oversized.OverSizedSlotContainer;
 import iskallia.vault.container.slot.TabSlot;
 import iskallia.vault.item.JewelPouchItem;
 import iskallia.vault.item.tool.JewelItem;
+import iskallia.vault.skill.base.Skill;
+import iskallia.vault.skill.expertise.type.JewelExpertise;
+import iskallia.vault.skill.tree.ExpertiseTree;
+import iskallia.vault.world.data.PlayerExpertisesData;
+import iskallia.vault.world.data.PlayerVaultStatsData;
 import lv.id.bonne.vaulthunters.morevaulttables.block.entity.JewelSelectorTableTileEntity;
+import lv.id.bonne.vaulthunters.morevaulttables.block.screen.JewelSelectorTableScreen;
 import lv.id.bonne.vaulthunters.morevaulttables.init.MoreVaultTablesReferences;
+import lv.id.bonne.vaulthunters.morevaulttables.mixin.JewelPouchItemInvoker;
+import lv.id.bonne.vaulthunters.morevaulttables.network.MoreVaultTablesNetwork;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -73,12 +88,42 @@ public class JewelSelectorTableContainer extends OverSizedSlotContainer
 
         Container invContainer = this.tileEntity.getInputInventory();
 
+        // add one more empty slot
+        this.addSlot(new TabSlot(invContainer, 0, -999, 50)
+        {
+            @Override
+            public boolean mayPlace(@NotNull ItemStack stack)
+            {
+                // Input inventory allows only jewel pouches.
+                return stack.getItem() instanceof JewelPouchItem;
+            }
+
+
+            @Override
+            public void setChanged()
+            {
+                super.setChanged();
+
+                if (JewelSelectorTableContainer.this.player instanceof LocalPlayer)
+                {
+                    if (Minecraft.getInstance().screen instanceof JewelSelectorTableScreen screen)
+                    {
+                        screen.setRegenerate();
+                    }
+                }
+                else if (JewelSelectorTableContainer.this.player instanceof ServerPlayer player)
+                {
+                    JewelSelectorTableContainer.this.identifyPouchItem(player);
+                }
+            }
+        });
+
         for (i = 0; i < 20; ++i)
         {
             for (int j = 0; j < 3; ++j)
             {
                 // Init slots somewhere far so they are not displayed.
-                this.addSlot(new TabSlot(invContainer, i * 3 + j, -999 + j * 18, 50 + i * 18)
+                this.addSlot(new TabSlot(invContainer, i * 3 + j + 1, -999 + j * 18, 50 + (i + 1) * 18)
                 {
                     public boolean mayPlace(@NotNull ItemStack stack)
                     {
@@ -209,6 +254,150 @@ public class JewelSelectorTableContainer extends OverSizedSlotContainer
     public boolean stillValid(@NotNull Player player)
     {
         return this.tileEntity != null && this.tileEntity.stillValid(this.player);
+    }
+
+
+    /**
+     * This method identifies a pouch item in selected slot.
+     * @param serverPlayer player who performs identification.
+     */
+    public void identifyPouchItem(ServerPlayer serverPlayer)
+    {
+        ItemStack selectedPouch = this.getTileEntity().getSelectedPouch();
+
+        if (selectedPouch.isEmpty() || !selectedPouch.getOrCreateTag().isEmpty())
+        {
+            // Not a jewel pouch or pouch is identified already.
+            return;
+        }
+
+        int vaultLevel = JewelPouchItem.getStoredLevel(selectedPouch).orElseGet(() ->
+            PlayerVaultStatsData.get(serverPlayer.getLevel()).getVaultStats(serverPlayer).getVaultLevel());
+
+        int additionalIdentifiedJewels = 0;
+        ExpertiseTree expertises =
+            PlayerExpertisesData.get(serverPlayer.getLevel()).getExpertises(serverPlayer);
+
+        JewelExpertise expertise;
+        for (Iterator<?> var10 = expertises.getAll(JewelExpertise.class, Skill::isUnlocked).iterator();
+            var10.hasNext(); additionalIdentifiedJewels += expertise.getAdditionalIdentifiedJewels())
+        {
+            expertise = (JewelExpertise) var10.next();
+        }
+
+        JewelPouchItemInvoker.invokeGenerateJewels(selectedPouch, vaultLevel, additionalIdentifiedJewels);
+
+        // Trigger update on menu.
+        this.getTileEntity().updateSelectedPouch(selectedPouch);
+    }
+
+
+    /**
+     * This method craft jewel item in given slot and moves into crafting slot new pouch.
+     * @param slotIndex Slot index.
+     * @return {@code true} there should broadcast changes, {@code false} otherwise.
+     */
+    public boolean craftAndMoveItem(int slotIndex)
+    {
+        ItemStack selectedPouch = this.getTileEntity().getSelectedPouch();
+
+        if (selectedPouch.isEmpty() || selectedPouch.getOrCreateTag().isEmpty())
+        {
+            // Do not have jewels in pouch.
+            return false;
+        }
+
+        List<JewelPouchItem.RolledJewel> jewels = JewelPouchItem.getJewels(selectedPouch);
+
+        if (jewels.size() < slotIndex)
+        {
+            // Clicked outside jewels.
+            return false;
+        }
+
+        if (this.getTileEntity().getTotalSizeInJewels() < 60)
+        {
+            boolean moved = false;
+
+            OverSizedInventory outputInventory = this.getTileEntity().getOutputInventory();
+
+            for (int i = 0; i < outputInventory.getContainerSize() && !moved; i++)
+            {
+                ItemStack item = outputInventory.getItem(i);
+
+                if (item.isEmpty())
+                {
+                    outputInventory.setItem(i, jewels.get(slotIndex).stack());
+                    moved = true;
+                }
+            }
+
+            if (moved)
+            {
+                // Remove item.
+                OverSizedInventory inputInventory = this.getTileEntity().getInputInventory();
+                inputInventory.setItem(0, ItemStack.EMPTY);
+
+                this.moveItem();
+            }
+            else
+            {
+                // Log error message about no slots.
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+
+    /**
+     * This method moves item from pouches list into identification slot.
+     */
+    public void moveItem()
+    {
+        // Remove item.
+        OverSizedInventory inputInventory = this.getTileEntity().getInputInventory();
+
+        if (!inputInventory.getItem(0).isEmpty())
+        {
+            return;
+        }
+
+        if (this.getTileEntity().getTotalSizeInPouches() <= 0)
+        {
+            return;
+        }
+
+        // Get next item
+        for (int i = 1; i < inputInventory.getContainerSize(); i++)
+        {
+            ItemStack item = inputInventory.getItem(i);
+
+            if (!item.isEmpty())
+            {
+                if (item.getCount() > 1)
+                {
+                    // Reduce count by 1
+                    ItemStack copy = item.copy();
+                    copy.setCount(copy.getCount() - 1);
+                    inputInventory.setItem(i, copy);
+                }
+                else
+                {
+                    // Set item stack to air
+                    inputInventory.setItem(i, ItemStack.EMPTY);
+                }
+
+                // set count to 1
+                item.setCount(1);
+
+                // set item in first slot.
+                inputInventory.setItem(0, item);
+                break;
+            }
+        }
     }
 
 

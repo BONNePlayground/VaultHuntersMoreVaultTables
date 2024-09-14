@@ -6,7 +6,6 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -25,18 +24,15 @@ import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
 import iskallia.vault.client.gui.framework.text.LabelTextStyle;
 import iskallia.vault.item.JewelPouchItem;
-import iskallia.vault.skill.base.Skill;
-import iskallia.vault.skill.expertise.type.JewelExpertise;
-import iskallia.vault.skill.tree.ExpertiseTree;
-import iskallia.vault.world.data.PlayerExpertisesData;
-import iskallia.vault.world.data.PlayerVaultStatsData;
 import lv.id.bonne.vaulthunters.morevaulttables.block.menu.JewelSelectorTableContainer;
 import lv.id.bonne.vaulthunters.morevaulttables.init.MoreVaultTablesTextureAtlases;
-import lv.id.bonne.vaulthunters.morevaulttables.mixin.JewelPouchItemInvoker;
+import lv.id.bonne.vaulthunters.morevaulttables.network.MoreVaultTablesNetwork;
+import lv.id.bonne.vaulthunters.morevaulttables.network.packets.MoveAndOpenObjectPacket;
+import lv.id.bonne.vaulthunters.morevaulttables.network.packets.SelectCraftingObjectPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
@@ -148,35 +144,16 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
 
         // The elements that are displayed in the GUI.
         this.elementList = new ArrayList<>(4);
+        this.rolledJewelList = new ArrayList<>();
 
         // Middle screen element
         if (container.getTileEntity() != null)
         {
             ItemStack stack = container.getTileEntity().getSelectedPouch();
 
-            int numberOfSlots = 3;
-
             if (!stack.isEmpty() && stack.getOrCreateTag().isEmpty())
             {
-                if (container.getPlayer() instanceof ServerPlayer serverPlayer)
-                {
-                    int vaultLevel = JewelPouchItem.getStoredLevel(stack).orElseGet(() ->
-                        PlayerVaultStatsData.get(serverPlayer.getLevel()).getVaultStats(serverPlayer).getVaultLevel());
-
-                    int additionalIdentifiedJewels = 0;
-                    ExpertiseTree expertises =
-                        PlayerExpertisesData.get(serverPlayer.getLevel()).getExpertises(serverPlayer);
-
-                    JewelExpertise expertise;
-                    for (Iterator<?> var10 = expertises.getAll(JewelExpertise.class, Skill::isUnlocked).iterator();
-                        var10.hasNext(); additionalIdentifiedJewels += expertise.getAdditionalIdentifiedJewels())
-                    {
-                        expertise = (JewelExpertise) var10.next();
-                    }
-
-                    numberOfSlots += additionalIdentifiedJewels;
-                    JewelPouchItemInvoker.invokeGenerateJewels(stack, vaultLevel, additionalIdentifiedJewels);
-                }
+                MoreVaultTablesNetwork.sendToServer(new MoveAndOpenObjectPacket(false));
             }
 
             this.addElement((new NineSliceElement<>(Spatials.positionXY(this.pouchesBackgroundElement.right() + 5, 16).
@@ -186,19 +163,23 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
                 layout((screen, gui, parent, world) -> world.translateXY(gui).translateY(-5).translateZ(-10)));
 
             // Get rolled jewels
-            List<JewelPouchItem.RolledJewel> rolledJewels = JewelPouchItem.getJewels(stack);
+            this.rolledJewelList.addAll(JewelPouchItem.getJewels(this.menu.getTileEntity().getSelectedPouch()));
+            int numberOfSlots = Mth.clamp(this.rolledJewelList.size(), 3, 4);
 
             for (int i = 0; i < numberOfSlots; i++)
             {
                 final int finalI = i;
 
-                SelectableFakeItemSlotElement<?> slot = new SelectableFakeItemSlotElement<>(Spatials.positionXY(130, 18 * (i + 1)),
-                    () -> rolledJewels.isEmpty() ? ItemStack.EMPTY : rolledJewels.get(finalI).stack(),
-                    () -> rolledJewels.isEmpty() || this.getMenu().getTileEntity().getTotalSizeInJewels() >= 60).
+                SelectableFakeItemSlotElement<?> slot = new SelectableFakeItemSlotElement<>(Spatials.positionXY(
+                    130,
+                    18 * (i + 1)),
+                    () -> this.rolledJewelList.size() > finalI ? this.rolledJewelList.get(finalI).stack() : ItemStack.EMPTY,
+                    () -> this.menu.getTileEntity().getSelectedPouch().isEmpty() ||
+                        this.getMenu().getTileEntity().getTotalSizeInJewels() >= 60).
                     setLabelStackCount().
                     layout((screen, gui, parent, world) -> world.translateXY(gui));
 
-                slot.whenClicked(JewelSelectorTableScreen.this.new MouseClickRunnable(121 + i));
+                slot.whenClicked(new MouseClickRunnable(i, ScrollMenu.RESULT));
                 this.addElement(slot);
                 this.elementList.add(slot);
             }
@@ -206,119 +187,172 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
     }
 
 
-    public boolean mouseReleased(double pMouseX, double pMouseY, int pButton)
-    {
-        if (this.skipRelease ||
-            this.pouchesBackgroundElement.contains(pMouseX, pMouseY) ||
-            this.jewelsBackgroundElement.contains(pMouseX, pMouseY))
-        {
-            this.skipRelease = false;
-            this.isQuickCrafting = false;
-        }
-
-        return super.mouseReleased(pMouseX, pMouseY, pButton);
-    }
-
-
     /**
-     * Custom mouse click handling. This targets clicks on items inside scrollbars.
-     * @param scrollMenu The scrollbar type.
-     * @param buttonIndex Button in scrollbar.
-     * @param slotClicked Clicked slot.
+     * This method manages container ticking.
      */
-    public void mouseClicked(ScrollMenu scrollMenu, int buttonIndex, int slotClicked)
-    {
-        InputConstants.Key mouseKey = MOUSE.getOrCreate(buttonIndex);
-        Slot slot = this.menu.getSlot(slotClicked);
-        this.skipRelease = false;
-
-        int l = slot.index;
-
-        if (l != -1 && !this.isQuickCrafting)
-        {
-            boolean flag2;
-            ClickType clicktype;
-
-            if (this.menu.getCarried().isEmpty())
-            {
-                if (this.minecraft != null && this.minecraft.options.keyPickItem.isActiveAndMatches(mouseKey))
-                {
-                    this.slotClicked(slot, l, buttonIndex, ClickType.CLONE);
-                }
-                else
-                {
-                    flag2 = (l != -999 && l != 999) && (
-                        InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 340) ||
-                            InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 344));
-
-                    clicktype = ClickType.PICKUP;
-
-                    if (flag2)
-                    {
-                        clicktype = ClickType.QUICK_MOVE;
-                    }
-                    else if (l == -999 || l == 999)
-                    {
-                        clicktype = ClickType.THROW;
-                    }
-
-                    this.slotClicked(slot, l, buttonIndex, clicktype);
-                }
-            }
-            else if (this.minecraft == null || !this.minecraft.options.keyPickItem.isActiveAndMatches(mouseKey))
-            {
-                flag2 = (l != -999 && l != 999) && (
-                    InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 340) ||
-                        InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 344));
-                clicktype = ClickType.PICKUP;
-
-                if (flag2)
-                {
-                    clicktype = ClickType.QUICK_MOVE;
-                }
-
-                this.slotClicked(slot, l, buttonIndex, clicktype);
-            }
-
-            this.skipRelease = true;
-        }
-    }
-
-
+    @Override
     protected void containerTick()
     {
         super.containerTick();
+
         if (this.menu.getTileEntity() != null)
         {
-            if (!this.menu.getTileEntity().getSelectedPouch().isEmpty())
+            // Redraw all jewels from the pouch
+            if (this.regenerate || !this.menu.getTileEntity().getSelectedPouch().isEmpty() && this.rolledJewelList.isEmpty())
             {
-                this.elementList.forEach(element -> {
-                    element.tooltip(Tooltips.shift(
-                        Tooltips.multi(() -> element.getDisplayStack().getTooltipLines(Minecraft.getInstance().player,
-                            TooltipFlag.Default.NORMAL)),
-                        Tooltips.multi(() -> element.getDisplayStack().getTooltipLines(Minecraft.getInstance().player,
-                            TooltipFlag.Default.ADVANCED))));
-                });
+                this.rolledJewelList.clear();
+                this.rolledJewelList.addAll(JewelPouchItem.getJewels(this.menu.getTileEntity().getSelectedPouch()));
+                this.regenerate = false;
             }
 
+            this.elementList.forEach(element -> {
+                element.tooltip(Tooltips.shift(
+                    Tooltips.multi(() -> element.getDisplayStack().getTooltipLines(Minecraft.getInstance().player,
+                        TooltipFlag.Default.NORMAL)),
+                    Tooltips.multi(() -> element.getDisplayStack().getTooltipLines(Minecraft.getInstance().player,
+                        TooltipFlag.Default.ADVANCED))));
+            });
+
+            // Refresh other elements.
             this.pouchesElement.refreshElements(this.getMenu());
             this.jewelsElement.refreshElements(this.getMenu());
         }
     }
 
 
-    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers)
+    /**
+     * Mouse release detections.
+     * @param mouseX Mouse X location.
+     * @param mouseY Mouse Y location.
+     * @param button Clicked button.
+     * @return {@code true} if mouse released, {@code false} otherwise
+     */
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button)
     {
-        InputConstants.Key key = InputConstants.getKey(pKeyCode, pScanCode);
-        if (pKeyCode != GLFW.GLFW_KEY_ESCAPE && !Minecraft.getInstance().options.keyInventory.isActiveAndMatches(key))
+        if (this.skipRelease ||
+            this.pouchesBackgroundElement.contains(mouseX, mouseY) ||
+            this.jewelsBackgroundElement.contains(mouseX, mouseY))
         {
-            return super.keyPressed(pKeyCode, pScanCode, pModifiers);
+            this.skipRelease = false;
+            this.isQuickCrafting = false;
+        }
+
+        return super.mouseReleased(mouseX, mouseY, button);
+    }
+
+
+    /**
+     * Key release detections.
+     * @param keyCode Released key code.
+     * @param scanCode Scan code.
+     * @param modifiers Modifier.
+     * @return {@code true} if key released, {@code false} otherwise
+     */
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers)
+    {
+        InputConstants.Key key = InputConstants.getKey(keyCode, scanCode);
+
+        if (keyCode != GLFW.GLFW_KEY_ESCAPE && !Minecraft.getInstance().options.keyInventory.isActiveAndMatches(key))
+        {
+            return super.keyPressed(keyCode, scanCode, modifiers);
         }
         else
         {
             this.onClose();
             return true;
         }
+    }
+
+
+    /**
+     * This method performs quick move from fake slots.
+     * @param clickedSlot clicked slot.
+     * @param scrollMenu Menu type.
+     */
+    public void mouseClickedMoved(int clickedSlot, ScrollMenu scrollMenu)
+    {
+        InputConstants.Key mouseKey = MOUSE.getOrCreate(0);
+        Slot slot = this.menu.getSlot(clickedSlot);
+
+        this.skipRelease = false;
+        int slotIndex = slot.index;
+
+        if (slotIndex != -1 && !this.isQuickCrafting)
+        {
+            boolean canQuickMove;
+            ClickType clicktype;
+
+            if (this.menu.getCarried().isEmpty())
+            {
+                if (this.minecraft != null &&
+                    this.minecraft.options.keyPickItem.isActiveAndMatches(mouseKey))
+                {
+                    this.slotClicked(slot, slotIndex, 0, ClickType.CLONE);
+                }
+                else
+                {
+                    canQuickMove = scrollMenu != ScrollMenu.RESULT && (
+                        InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 340) ||
+                            InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 344));
+
+                    clicktype = ClickType.PICKUP;
+
+                    if (canQuickMove)
+                    {
+                        clicktype = ClickType.QUICK_MOVE;
+                    }
+
+                    this.slotClicked(slot, slotIndex, 0, clicktype);
+                }
+            }
+            else if (this.minecraft == null ||
+                !this.minecraft.options.keyPickItem.isActiveAndMatches(mouseKey))
+            {
+                canQuickMove = scrollMenu != ScrollMenu.RESULT && (
+                    InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 340) ||
+                        InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 344));
+
+                clicktype = ClickType.PICKUP;
+
+                if (canQuickMove)
+                {
+                    clicktype = ClickType.QUICK_MOVE;
+                }
+
+                this.slotClicked(slot, slotIndex, 0, clicktype);
+            }
+
+            this.skipRelease = true;
+        }
+
+        if (scrollMenu == ScrollMenu.POUCH)
+        {
+            if (this.menu.getTileEntity().getSelectedPouch().isEmpty())
+            {
+                MoreVaultTablesNetwork.sendToServer(new MoveAndOpenObjectPacket(true));
+            }
+        }
+    }
+
+
+    /**
+     * This method performs crafted jewel click.
+     * @param clickedSlot Clicked jewel
+     */
+    public void mouseClickedCraft(int clickedSlot)
+    {
+        MoreVaultTablesNetwork.sendToServer(new SelectCraftingObjectPacket(clickedSlot));
+    }
+
+
+    /**
+     * This method forces GUI to refresh crafting Jewel items.
+     */
+    public void setRegenerate()
+    {
+        this.regenerate = true;
     }
 
 
@@ -405,7 +439,7 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
         }
 
 
-        private class SelectorContainer<T extends ScrollableClickableItemStackSelectorElement<E, S>.SelectorContainer<T>>
+        private class SelectorContainer<T extends SelectorContainer<T>>
             extends ElasticContainerElement<T>
         {
             private SelectorContainer(int inheritedWidth)
@@ -479,8 +513,7 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
                             {
                                 return disabled;
                             });
-                    clickableSlot.whenClicked(JewelSelectorTableScreen.this.new MouseClickRunnable(
-                        37 + i + (scrollMenuType == ScrollMenu.JEWEL ? 59 : 0)));
+                    clickableSlot.whenClicked(new MouseClickRunnable(i, scrollMenuType));
                     entry.adjustSlot(clickableSlot);
                     this.addElement(clickableSlot);
                     this.slots.add(clickableSlot);
@@ -566,36 +599,9 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
 
         private final int slotColumns;
 
-        private final ScrollableClickableItemStackSelectorElement<E, S>.SelectorContainer<?> elementCt;
+        private final SelectorContainer<?> elementCt;
 
         private final ScrollMenu scrollMenuType;
-    }
-
-
-    public class MouseClickRunnable implements Runnable
-    {
-        public MouseClickRunnable(int s)
-        {
-            this.slot = s;
-        }
-
-
-        public void setType(int type)
-        {
-            this.type = type;
-        }
-
-
-        public void run()
-        {
-            JewelSelectorTableScreen.this.mouseClicked(this.scrollMenu, this.type, this.slot);
-        }
-
-        ScrollMenu scrollMenu;
-
-        int type = 0;
-
-        int slot = 0;
     }
 
 
@@ -629,33 +635,62 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
 
 
     /**
+     * This runnable is triggered on each mouse click.
+     */
+    private class MouseClickRunnable implements Runnable
+    {
+        /**
+         * Inits new runnable with specific clicked slot.
+         * @param slot slot index.
+         */
+        public MouseClickRunnable(int slot, ScrollMenu menu)
+        {
+            this.slot = slot + switch (menu) {
+                case JEWEL -> 36 + 1 + 60;
+                case POUCH -> 36 + 1;
+                case RESULT -> 0;
+            };
+
+            this.scrollMenu = menu;
+        }
+
+
+        /**
+         * The run instance.
+         */
+        public void run()
+        {
+            if (this.scrollMenu != ScrollMenu.RESULT)
+            {
+                JewelSelectorTableScreen.this.mouseClickedMoved(this.slot, this.scrollMenu);
+            }
+            else
+            {
+                JewelSelectorTableScreen.this.mouseClickedCraft(this.slot);
+            }
+        }
+
+
+        /**
+         * This variable stores which menu is clicked.
+         */
+        ScrollMenu scrollMenu;
+
+        /**
+         * This variable stores clicked slot.
+         */
+        int slot;
+    }
+
+
+    /**
      * This enum stores possible scroll bar menu types.
      */
-    private enum ScrollMenu
+    enum ScrollMenu
     {
-        JEWEL(999),
-        POUCH(-999);
-
-        ScrollMenu(int location)
-        {
-            this.location = location;
-        }
-
-
-        /**
-         * This method returns if selected menu is with given value.
-         * @param value the value that need to be checked.
-         * @return true is that is selected menu.
-         */
-        boolean isMenu(int value)
-        {
-            return this.location == value;
-        }
-
-        /**
-         * The location of scrollbar.
-         */
-        private final int location;
+        JEWEL,
+        POUCH,
+        RESULT
     }
 
     /**
@@ -682,6 +717,16 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
      * The opened jewel list.
      */
     private final List<SelectableFakeItemSlotElement<?>> elementList;
+
+    /**
+     * The list of rolled jewels.
+     */
+    private final List<JewelPouchItem.RolledJewel> rolledJewelList;
+
+    /**
+     * Indicates if pouch list need to be regenerated.
+     */
+    boolean regenerate = true;
 
     boolean skipRelease = false;
 }

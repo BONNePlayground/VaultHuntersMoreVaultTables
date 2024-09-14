@@ -2,7 +2,8 @@ package lv.id.bonne.vaulthunters.morevaulttables.network;
 
 
 import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTablesMod;
-import lv.id.bonne.vaulthunters.morevaulttables.network.packets.VaultJewelApplicationStationMessage;
+import lv.id.bonne.vaulthunters.morevaulttables.network.packets.MoveAndOpenObjectPacket;
+import lv.id.bonne.vaulthunters.morevaulttables.network.packets.SelectCraftingObjectPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
@@ -50,10 +51,16 @@ public class MoreVaultTablesNetwork
             serverAcceptedVersions(PROTOCOL_VERSION::equals).
             simpleChannel();
 
-        CHANNEL.messageBuilder(VaultJewelApplicationStationMessage.class, id(), NetworkDirection.PLAY_TO_SERVER).
-            decoder(VaultJewelApplicationStationMessage::decode).
-            encoder(VaultJewelApplicationStationMessage::encode).
-            consumer(VaultJewelApplicationStationMessage::handle).
+        CHANNEL.messageBuilder(MoveAndOpenObjectPacket.class, id(), NetworkDirection.PLAY_TO_SERVER).
+            decoder(MoveAndOpenObjectPacket::decode).
+            encoder(MoveAndOpenObjectPacket::encode).
+            consumer(MoveAndOpenObjectPacket::handle).
+            add();
+
+        CHANNEL.messageBuilder(SelectCraftingObjectPacket.class, id(), NetworkDirection.PLAY_TO_SERVER).
+            decoder(SelectCraftingObjectPacket::decode).
+            encoder(SelectCraftingObjectPacket::encode).
+            consumer(SelectCraftingObjectPacket::handle).
             add();
 
     }

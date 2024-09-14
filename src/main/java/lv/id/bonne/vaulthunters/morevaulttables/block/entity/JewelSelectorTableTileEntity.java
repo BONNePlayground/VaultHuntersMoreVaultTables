@@ -55,6 +55,16 @@ public class JewelSelectorTableTileEntity extends BlockEntity implements MenuPro
 
 
     /**
+     * This method updates selected pouch item.
+     * @param itemStack The selected pouch item.
+     */
+    public void updateSelectedPouch(ItemStack itemStack)
+    {
+        this.inputInventory.setItem(0, itemStack);
+    }
+
+
+    /**
      * Gets total size in jewels.
      *
      * @return the total size in jewels
@@ -62,6 +72,16 @@ public class JewelSelectorTableTileEntity extends BlockEntity implements MenuPro
     public int getTotalSizeInJewels()
     {
         return this.totalSizeInJewels;
+    }
+
+
+    /**
+     * This method returns number of pouches in input inventory.
+     * @return Number of pouches in input inventory.
+     */
+    public int getTotalSizeInPouches()
+    {
+        return this.totalSizeInPouches;
     }
 
 
@@ -295,11 +315,11 @@ public class JewelSelectorTableTileEntity extends BlockEntity implements MenuPro
 
             JewelSelectorTableTileEntity.this.totalSizeInPouches = 0;
 
-            for (int i = 1; i < 60; i++)
+            for (int i = 1; i < 61; i++)
             {
                 if (this.getItem(i).is(ModItems.JEWEL_POUCH))
                 {
-                    JewelSelectorTableTileEntity.this.totalSizeInJewels++;
+                    JewelSelectorTableTileEntity.this.totalSizeInPouches++;
                 }
             }
         }
