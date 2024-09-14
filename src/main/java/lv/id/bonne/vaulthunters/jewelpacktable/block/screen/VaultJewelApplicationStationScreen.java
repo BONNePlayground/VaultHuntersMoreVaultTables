@@ -24,13 +24,7 @@ import iskallia.vault.client.gui.framework.screen.AbstractElementContainerScreen
 import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
 import iskallia.vault.client.gui.framework.text.LabelTextStyle;
-import iskallia.vault.core.vault.Vault;
-import iskallia.vault.init.ModConfigs;
 import iskallia.vault.item.JewelPouchItem;
-import iskallia.vault.item.gear.DataInitializationItem;
-import iskallia.vault.item.gear.DataTransferItem;
-import iskallia.vault.item.gear.VaultLevelItem;
-import iskallia.vault.skill.base.LearnableSkill;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.expertise.type.JewelExpertise;
 import iskallia.vault.skill.tree.ExpertiseTree;
@@ -39,24 +33,22 @@ import iskallia.vault.world.data.PlayerVaultStatsData;
 import lv.id.bonne.vaulthunters.jewelpacktable.JewelPackTableMod;
 import lv.id.bonne.vaulthunters.jewelpacktable.init.ModTextureAtlases;
 import javax.annotation.Nullable;
-import lv.id.bonne.vaulthunters.jewelpacktable.block.menu.VaultJewelApplicationStationContainer;
+import lv.id.bonne.vaulthunters.jewelpacktable.block.menu.JewelSelectorTableContainer;
 import lv.id.bonne.vaulthunters.jewelpacktable.mixin.JewelPouchItemInvoker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 
 import static com.mojang.blaze3d.platform.InputConstants.Type.MOUSE;
 
 
-public class VaultJewelApplicationStationScreen extends AbstractElementContainerScreen<VaultJewelApplicationStationContainer>
+public class VaultJewelApplicationStationScreen extends AbstractElementContainerScreen<JewelSelectorTableContainer>
 {
     ScrollableClickableItemStackSelectorElement pouchesElement;
 
@@ -73,7 +65,7 @@ public class VaultJewelApplicationStationScreen extends AbstractElementContainer
 
     boolean skipRelease = false;
 
-    public VaultJewelApplicationStationScreen(VaultJewelApplicationStationContainer container,
+    public VaultJewelApplicationStationScreen(JewelSelectorTableContainer container,
         Inventory inventory,
         Component title)
     {
@@ -425,7 +417,7 @@ public class VaultJewelApplicationStationScreen extends AbstractElementContainer
         }
 
 
-        public void refreshElements(VaultJewelApplicationStationContainer container)
+        public void refreshElements(JewelSelectorTableContainer container)
         {
             this.elementCt.refresh(container);
         }
@@ -523,7 +515,7 @@ public class VaultJewelApplicationStationScreen extends AbstractElementContainer
             }
 
 
-            public void refresh(VaultJewelApplicationStationContainer container)
+            public void refresh(JewelSelectorTableContainer container)
             {
                 for (int i = 0; i < this.slots.size(); ++i)
                 {

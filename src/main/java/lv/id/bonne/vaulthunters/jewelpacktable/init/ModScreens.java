@@ -11,7 +11,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class ModScreens
 {
   public static void register() {
-    MenuScreens.register(ModContainers.VAULT_JEWEL_APPLICATION_STATION_CONTAINER, VaultJewelApplicationStationScreen::new);
+    MenuScreens.register(ModContainers.JEWEL_SELECTOR_TABLE_CONTAINER, VaultJewelApplicationStationScreen::new);
   }
 }
 

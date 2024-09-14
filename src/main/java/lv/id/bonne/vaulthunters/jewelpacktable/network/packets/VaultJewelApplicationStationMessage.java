@@ -9,7 +9,7 @@ package lv.id.bonne.vaulthunters.jewelpacktable.network.packets;
 
 import java.util.function.Supplier;
 
-import lv.id.bonne.vaulthunters.jewelpacktable.block.menu.VaultJewelApplicationStationContainer;
+import lv.id.bonne.vaulthunters.jewelpacktable.block.menu.JewelSelectorTableContainer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -33,8 +33,8 @@ public class VaultJewelApplicationStationMessage {
             ServerPlayer requester = context.getSender();
             if (requester != null) {
                 AbstractContainerMenu patt1027$temp = requester.containerMenu;
-                if (patt1027$temp instanceof VaultJewelApplicationStationContainer) {
-                    VaultJewelApplicationStationContainer container = (VaultJewelApplicationStationContainer)patt1027$temp;
+                if (patt1027$temp instanceof JewelSelectorTableContainer) {
+                    JewelSelectorTableContainer container = (JewelSelectorTableContainer)patt1027$temp;
                     return;
                 }
             }

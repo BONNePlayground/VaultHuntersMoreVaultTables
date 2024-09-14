@@ -8,7 +8,7 @@ import java.util.List;
 
 import iskallia.vault.container.oversized.OverSizedInventory;
 import iskallia.vault.init.ModItems;
-import lv.id.bonne.vaulthunters.jewelpacktable.block.menu.VaultJewelApplicationStationContainer;
+import lv.id.bonne.vaulthunters.jewelpacktable.block.menu.JewelSelectorTableContainer;
 import lv.id.bonne.vaulthunters.jewelpacktable.init.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -252,7 +252,7 @@ public class JewelSelectorTable extends BlockEntity implements MenuProvider
     public AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inv, @NotNull Player player)
     {
         return this.getLevel() == null ? null :
-            new VaultJewelApplicationStationContainer(containerId, this.getLevel(), this.getBlockPos(), inv);
+            new JewelSelectorTableContainer(containerId, this.getLevel(), this.getBlockPos(), inv);
     }
 
 
