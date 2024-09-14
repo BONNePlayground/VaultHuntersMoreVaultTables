@@ -11,6 +11,9 @@ import iskallia.vault.container.oversized.OverSizedSlotContainer;
 import iskallia.vault.container.oversized.OverSizedTabSlot;
 import iskallia.vault.container.slot.TabSlot;
 import iskallia.vault.item.JewelPouchItem;
+import iskallia.vault.item.gear.DataInitializationItem;
+import iskallia.vault.item.gear.DataTransferItem;
+import iskallia.vault.item.gear.VaultLevelItem;
 import iskallia.vault.item.tool.JewelItem;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.expertise.type.JewelExpertise;
@@ -296,9 +299,10 @@ public class JewelSelectorTableContainer extends OverSizedSlotContainer
     /**
      * This method craft jewel item in given slot and moves into crafting slot new pouch.
      * @param slotIndex Slot index.
+     * @param serverPlayer Server player.
      * @return {@code true} there should broadcast changes, {@code false} otherwise.
      */
-    public boolean craftAndMoveItem(int slotIndex)
+    public boolean craftAndMoveItem(int slotIndex, ServerPlayer serverPlayer)
     {
         ItemStack selectedPouch = this.getTileEntity().getSelectedPouch();
 
@@ -328,7 +332,25 @@ public class JewelSelectorTableContainer extends OverSizedSlotContainer
 
                 if (item.isEmpty())
                 {
-                    outputInventory.setItem(i, jewels.get(slotIndex).stack());
+                    JewelPouchItem.RolledJewel rolledJewel = jewels.get(slotIndex);
+                    ItemStack result = rolledJewel.stack().copy();
+
+                    if (!rolledJewel.identified())
+                    {
+                        if (result.getItem() instanceof VaultLevelItem levelItem)
+                        {
+                            int vaultLevel = JewelPouchItem.getStoredLevel(selectedPouch).
+                                orElseGet(() -> PlayerVaultStatsData.get(serverPlayer.getLevel()).
+                                    getVaultStats(serverPlayer).getVaultLevel());
+
+                            levelItem.initializeVaultLoot(vaultLevel, result, null, null);
+                        }
+
+                        result = DataTransferItem.doConvertStack(result);
+                        DataInitializationItem.doInitialize(result);
+                    }
+
+                    outputInventory.setItem(i, result);
                     moved = true;
                 }
             }

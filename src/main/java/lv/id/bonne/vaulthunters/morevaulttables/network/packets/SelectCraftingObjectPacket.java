@@ -63,7 +63,7 @@ public class SelectCraftingObjectPacket
 
                 if (menu instanceof JewelSelectorTableContainer container)
                 {
-                    if (container.craftAndMoveItem(message.slot))
+                    if (container.craftAndMoveItem(message.slot, requester))
                     {
                         container.identifyPouchItem(requester);
                         container.broadcastChanges();
