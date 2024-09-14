@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 
 import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTablesMod;
 import lv.id.bonne.vaulthunters.morevaulttables.block.JewelSelectorTableBlock;
+import lv.id.bonne.vaulthunters.morevaulttables.init.MoreVaultTablesConstants;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -55,7 +56,8 @@ public class MoreVaultTablesBlockRegistry
      */
     private static <T extends Block> RegistryObject<Item> registerBlockItem(String name, RegistryObject<T> block)
     {
-        return MoreVaultTablesItemRegistry.REGISTRY.register(name, () -> new BlockItem(block.get(), new Item.Properties()));
+        return MoreVaultTablesItemRegistry.REGISTRY.register(name, () ->
+            new BlockItem(block.get(), new Item.Properties().tab(MoreVaultTablesConstants.MORE_TABLES)));
     }
 
     /**
