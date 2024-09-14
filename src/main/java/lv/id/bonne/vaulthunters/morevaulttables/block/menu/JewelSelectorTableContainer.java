@@ -24,7 +24,6 @@ import lv.id.bonne.vaulthunters.morevaulttables.block.entity.JewelSelectorTableT
 import lv.id.bonne.vaulthunters.morevaulttables.block.screen.JewelSelectorTableScreen;
 import lv.id.bonne.vaulthunters.morevaulttables.init.MoreVaultTablesReferences;
 import lv.id.bonne.vaulthunters.morevaulttables.mixin.JewelPouchItemInvoker;
-import lv.id.bonne.vaulthunters.morevaulttables.network.MoreVaultTablesNetwork;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
