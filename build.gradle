@@ -140,7 +140,7 @@ dependencies {
     // Curseforge mod dependencies
     //implementation fg.deobf("curse.maven:vault-hunters-official-mod-458203:${vault_hunters_version}")
 
-    implementation fg.deobf("iskallia.vault:the_vault-3411:3411")
+    implementation fg.deobf("iskallia.vault:the_vault-3434:3434")
 
 //    Dependencies for Runtime Debug
     implementation fg.deobf("curse.maven:quark-243121:3840125")

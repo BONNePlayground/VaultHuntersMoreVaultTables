@@ -375,6 +375,9 @@ public class CardSelectorTableScreen extends AbstractElementContainerScreen<Card
     }
 
 
+    /**
+     * This method collects cards for displaying in menu.
+     */
     private void collectCardList()
     {
         this.rolledCardList.clear();
@@ -385,6 +388,7 @@ public class CardSelectorTableScreen extends AbstractElementContainerScreen<Card
 
             if (cards == null)
             {
+                MoreVaultTablesNetwork.sendToServer(new MoveAndOpenObjectPacket(false));
                 return;
             }
 

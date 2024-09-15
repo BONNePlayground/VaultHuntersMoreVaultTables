@@ -6,15 +6,20 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+import iskallia.vault.block.entity.base.FilteredInputInventoryTileEntity;
 import iskallia.vault.container.oversized.OverSizedInventory;
 import iskallia.vault.init.ModItems;
+import iskallia.vault.integration.IntegrationRefinedStorage;
+import javax.annotation.Nonnull;
 import lv.id.bonne.vaulthunters.morevaulttables.block.menu.CardSelectorTableContainer;
 import lv.id.bonne.vaulthunters.morevaulttables.init.MoreVaultTablesReferences;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Container;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -22,13 +27,16 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.CapabilityItemHandler;
 
 
 /**
  * The Card selector table allows to unpack Card Packs in single workstation without
  * using right-click menu.
  */
-public class CardSelectorTableTileEntity extends BlockEntity implements MenuProvider
+public class CardSelectorTableTileEntity extends BlockEntity implements MenuProvider, FilteredInputInventoryTileEntity
 {
     /**
      * Instantiates a new Card selector table.
@@ -186,6 +194,7 @@ public class CardSelectorTableTileEntity extends BlockEntity implements MenuProv
      * This method loads table content from NBT data.
      * @param tag The NBT data that contains table content.
      */
+    @Override
     public void load(@NotNull CompoundTag tag)
     {
         super.load(tag);
@@ -210,6 +219,7 @@ public class CardSelectorTableTileEntity extends BlockEntity implements MenuProv
        * This method saves table content into NBT data.
        * @param tag The NBT data where table content need to be saved.
       */
+    @Override
     protected void saveAdditional(@NotNull CompoundTag tag)
     {
         super.saveAdditional(tag);
@@ -232,6 +242,7 @@ public class CardSelectorTableTileEntity extends BlockEntity implements MenuProv
      * @return Method that updates NBT tag.
      */
     @NotNull
+    @Override
     public CompoundTag getUpdateTag()
     {
         return this.saveWithoutMetadata();
@@ -243,6 +254,7 @@ public class CardSelectorTableTileEntity extends BlockEntity implements MenuProv
      * @return Packet that is sent to client
      */
     @Nullable
+    @Override
     public ClientboundBlockEntityDataPacket getUpdatePacket()
     {
         return ClientboundBlockEntityDataPacket.create(this);
@@ -254,6 +266,7 @@ public class CardSelectorTableTileEntity extends BlockEntity implements MenuProv
      * @return The display name for table./
      */
     @NotNull
+    @Override
     public Component getDisplayName()
     {
         return this.getBlockState().getBlock().getName();
@@ -268,10 +281,202 @@ public class CardSelectorTableTileEntity extends BlockEntity implements MenuProv
      * @return Container Menu that is opened.
      */
     @Nullable
+    @Override
     public AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inv, @NotNull Player player)
     {
         return this.getLevel() == null ? null :
             new CardSelectorTableContainer(containerId, this.getLevel(), this.getBlockPos(), inv);
+    }
+
+
+    /**
+     * This method dictates if items can be inserted into this container.
+     * @param slot Slot that is targeted.
+     * @param itemStack Inserted item stack
+     * @return {@code true} if item can be inserted, {@code false} otherwise
+     */
+    @Override
+    public boolean canInsertItem(int slot, @NotNull ItemStack itemStack)
+    {
+        // The item will should not be placed in first slot.
+        return itemStack.is(ModItems.BOOSTER_PACK);
+    }
+
+
+    /**
+     * Indicates from which directions items can be inserted.
+     * @param direction Insertion direction.
+     * @return {@code true} if item can be inserted from that direction, {@code false} otherwise
+     */
+    @Override
+    public boolean isInventorySideAccessible(@Nullable Direction direction)
+    {
+        // Allow all here.
+        return true;
+    }
+
+
+    /**
+     * This method returns input filter compatibility.
+     * @param inventory The targeted inventory.
+     * @param side The input side.
+     * @return LazyOptional with capability inside it.
+     * @param <T> Capability type.
+     */
+    @Override
+    public <T> LazyOptional<T> getFilteredInputCapability(@NotNull Container inventory, @Nullable Direction side)
+    {
+        return !this.isInventorySideAccessible(side) ? LazyOptional.empty() :
+            LazyOptional.of(() -> new FilteredInvWrapper(this, inventory)
+            {
+                @NotNull
+                @Override
+                public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate)
+                {
+                    if (!canInsertItem(slot, stack))
+                    {
+                        // Cannot insert.
+                        return stack;
+                    }
+                    else if (slot == 0)
+                    {
+                        // Custom slot 0 processor
+                        if (this.getStackInSlot(0).isEmpty())
+                        {
+                            if (stack.getCount() > 1)
+                            {
+                                stack = stack.copy();
+
+                                if (!simulate)
+                                {
+                                    this.getInv().setItem(slot, stack.split(1));
+                                    this.getInv().setChanged();
+                                }
+                                else
+                                {
+                                    stack.shrink(Math.min(stack.getCount(), 1));
+                                }
+
+                                return stack;
+                            }
+                            else
+                            {
+                                if (!simulate)
+                                {
+                                    ItemStack copy = stack.copy();
+                                    this.getInv().setItem(slot, copy);
+                                    this.getInv().setChanged();
+                                }
+
+                                return ItemStack.EMPTY;
+                            }
+                        }
+                        else
+                        {
+                            // Cannot insert item into non-empty slot
+                            return stack;
+                        }
+                    }
+                    else
+                    {
+                        // Default processing.
+                        return super.insertItem(slot, stack, simulate);
+                    }
+                }
+            }).cast();
+    }
+
+
+    /**
+     * This method returns output filter compatibility.
+     * @param inventory The targeted inventory.
+     * @param side The output side.
+     * @return LazyOptional with capability inside it.
+     * @param <T> Capability type.
+     */
+    public <T> LazyOptional<T> getFilteredOutputCapability(@NotNull Container inventory, @Nullable Direction side)
+    {
+        // Only down direction currently
+        return side != Direction.DOWN ? LazyOptional.empty() :
+            LazyOptional.of(() -> new FilteredInvWrapper(this, inventory)
+            {
+                /**
+                 * This method use default extraction method.
+                 * @param slot     Slot to extract from.
+                 * @param amount   Amount to extract (may be greater than the current stack's max limit)
+                 * @param simulate If true, the extraction is only simulated
+                 * @return Extracted ItemStack.
+                 */
+                @NotNull
+                @Override
+                public ItemStack extractItem(int slot, int amount, boolean simulate)
+                {
+                    if (amount == 0)
+                    {
+                        return ItemStack.EMPTY;
+                    }
+
+                    ItemStack stackInSlot = inventory.getItem(slot);
+
+                    if (stackInSlot.isEmpty())
+                    {
+                        return ItemStack.EMPTY;
+                    }
+
+                    if (simulate)
+                    {
+                        if (stackInSlot.getCount() < amount)
+                        {
+                            return stackInSlot.copy();
+                        }
+                        else
+                        {
+                            ItemStack copy = stackInSlot.copy();
+                            copy.setCount(amount);
+                            return copy;
+                        }
+                    }
+                    else
+                    {
+                        int m = Math.min(stackInSlot.getCount(), amount);
+
+                        ItemStack decrStackSize = inventory.removeItem(slot, m);
+                        inventory.setChanged();
+                        return decrStackSize;
+                    }
+                }
+            }).cast();
+    }
+
+
+    /**
+     * This method returns requested capability for given side direction.
+     * @param cap The capability to check
+     * @param side The Side to check from,
+     *   <strong>CAN BE NULL</strong>. Null is defined to represent 'internal' or 'self'
+     * @return LazyOptional with capability.
+     * @param <T> Capability Type.
+     */
+    @NotNull
+    @Override
+    public <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side)
+    {
+        if (IntegrationRefinedStorage.shouldPreventImportingCapability(this.getLevel(), this.getBlockPos(), side))
+        {
+            return super.getCapability(cap, side);
+        }
+        else if (Direction.DOWN == side)
+        {
+            return cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ?
+                this.getFilteredOutputCapability(this.outputInventory, side) :
+                super.getCapability(cap, side);
+        }
+        else
+        {
+            return cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ?
+                this.getFilteredInputCapability(this.inputInventory, side) :
+                super.getCapability(cap, side);
+        }
     }
 
 
@@ -288,6 +493,7 @@ public class CardSelectorTableTileEntity extends BlockEntity implements MenuProv
         /**
          * This method updates how many cards are in the system, to not allow overflows.
          */
+        @Override
         public void setChanged()
         {
             super.setChanged();
@@ -308,6 +514,7 @@ public class CardSelectorTableTileEntity extends BlockEntity implements MenuProv
         /**
          * This method updates how many card pouches are in the system
          */
+        @Override
         public void setChanged()
         {
             super.setChanged();
