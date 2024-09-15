@@ -40,7 +40,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 /**
  * The Jewel selector table container class.
  */
-public class JewelSelectorTableContainer extends OverSizedSlotContainer
+public class JewelSelectorTableContainer extends OverSizedSlotContainer implements ICraftingSpotManager
 {
     /**
      * Instantiates a new Jewel selector table container.
@@ -116,7 +116,7 @@ public class JewelSelectorTableContainer extends OverSizedSlotContainer
                 }
                 else if (JewelSelectorTableContainer.this.player instanceof ServerPlayer serverPlayer)
                 {
-                    JewelSelectorTableContainer.this.identifyPouchItem(serverPlayer);
+                    JewelSelectorTableContainer.this.identifySelectedItem(serverPlayer);
                 }
             }
         });
@@ -264,7 +264,8 @@ public class JewelSelectorTableContainer extends OverSizedSlotContainer
      * This method identifies a pouch item in selected slot.
      * @param serverPlayer player who performs identification.
      */
-    public void identifyPouchItem(ServerPlayer serverPlayer)
+    @Override
+    public void identifySelectedItem(ServerPlayer serverPlayer)
     {
         ItemStack selectedPouch = this.getTileEntity().getSelectedPouch();
 
@@ -301,6 +302,7 @@ public class JewelSelectorTableContainer extends OverSizedSlotContainer
      * @param serverPlayer Server player.
      * @return {@code true} there should broadcast changes, {@code false} otherwise.
      */
+    @Override
     public boolean craftAndMoveItem(int slotIndex, ServerPlayer serverPlayer)
     {
         ItemStack selectedPouch = this.getTileEntity().getSelectedPouch();
@@ -377,6 +379,7 @@ public class JewelSelectorTableContainer extends OverSizedSlotContainer
     /**
      * This method moves item from pouches list into identification slot.
      */
+    @Override
     public void moveItem()
     {
         // Remove item.

@@ -9,7 +9,7 @@ package lv.id.bonne.vaulthunters.morevaulttables.network.packets;
 
 import java.util.function.Supplier;
 
-import lv.id.bonne.vaulthunters.morevaulttables.block.menu.JewelSelectorTableContainer;
+import lv.id.bonne.vaulthunters.morevaulttables.block.menu.ICraftingSpotManager;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -49,12 +49,12 @@ public class SelectCraftingObjectPacket
             {
                 AbstractContainerMenu menu = requester.containerMenu;
 
-                if (menu instanceof JewelSelectorTableContainer container)
+                if (menu instanceof ICraftingSpotManager container)
                 {
                     if (container.craftAndMoveItem(message.slot, requester))
                     {
-                        container.identifyPouchItem(requester);
-                        container.broadcastChanges();
+                        container.identifySelectedItem(requester);
+                        menu.broadcastChanges();
                     }
                 }
             }
