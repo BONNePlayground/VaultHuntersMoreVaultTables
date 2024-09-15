@@ -7,6 +7,7 @@
 package lv.id.bonne.vaulthunters.morevaulttables.init;
 
 
+import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,6 @@ import iskallia.vault.client.atlas.ITextureAtlas;
 import iskallia.vault.client.atlas.ResourceTextureAtlasHolder;
 import iskallia.vault.client.atlas.TextureAtlasRegion;
 import iskallia.vault.util.function.Memo;
-import javax.annotation.Nullable;
 import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTablesMod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;

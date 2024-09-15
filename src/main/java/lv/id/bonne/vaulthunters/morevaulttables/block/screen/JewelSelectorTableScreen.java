@@ -2,12 +2,9 @@ package lv.id.bonne.vaulthunters.morevaulttables.block.screen;
 
 
 import com.mojang.blaze3d.platform.InputConstants;
-import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 

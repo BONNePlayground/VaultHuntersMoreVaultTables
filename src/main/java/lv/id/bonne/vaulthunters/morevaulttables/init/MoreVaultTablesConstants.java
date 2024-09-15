@@ -10,8 +10,6 @@ package lv.id.bonne.vaulthunters.morevaulttables.init;
 
 import org.jetbrains.annotations.NotNull;
 
-import iskallia.vault.init.ModBlocks;
-import iskallia.vault.init.ModItems;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
