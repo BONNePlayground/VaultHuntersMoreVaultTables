@@ -271,7 +271,7 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
      * @param clickedSlot clicked slot.
      * @param scrollMenu Menu type.
      */
-    public void mouseClickedMoved(int clickedSlot, ScrollMenu scrollMenu)
+    private void mouseClickedMoved(int clickedSlot, ScrollMenu scrollMenu)
     {
         InputConstants.Key mouseKey = MOUSE.getOrCreate(0);
         Slot slot = this.menu.getSlot(clickedSlot);
@@ -341,7 +341,7 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
      * This method performs crafted jewel click.
      * @param clickedSlot Clicked jewel
      */
-    public void mouseClickedCraft(int clickedSlot)
+    private void mouseClickedCraft(int clickedSlot)
     {
         MoreVaultTablesNetwork.sendToServer(new SelectCraftingObjectPacket(clickedSlot));
     }
@@ -356,7 +356,12 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
     }
 
 
-    public class ScrollableClickableItemStackSelectorElement<E extends ScrollableClickableItemStackSelectorElement<E, S>, S extends ScrollableClickableItemStackSelectorElement.ItemSelectorEntry>
+    /**
+     * This custom vertical scroll container allows to link slots that are out of screen with actual elements in them.
+     * @param <E>
+     * @param <S>
+     */
+    private class ScrollableClickableItemStackSelectorElement<E extends ScrollableClickableItemStackSelectorElement<E, S>, S extends ScrollableClickableItemStackSelectorElement.ItemSelectorEntry>
         extends VerticalScrollClipContainer<E>
     {
         public ScrollableClickableItemStackSelectorElement(ISpatial spatial,
@@ -385,7 +390,7 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
             this.selectorModel = selectorModel;
             this.slotTexture = slotTexture;
             this.disabledSlotTexture = disabledSlotTexture;
-            this.addElement(this.elementCt = new SelectorContainer(spatial.width()));
+            this.addElement(this.elementCt = new SelectorContainer<>(spatial.width()));
         }
 
 
@@ -395,46 +400,33 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
         }
 
 
-        protected SelectorModel<S> getSelectorModel()
-        {
-            return this.selectorModel;
-        }
-
-
-        protected List<ClickableItemSlotElement<?>> getSelectorElements()
-        {
-            return Collections.unmodifiableList(this.elementCt.slots);
-        }
-
-
         protected ClickableItemSlotElement<?> makeElementSlot(ISpatial spatial,
             Supplier<ItemStack> itemStack,
             TextureAtlasRegion slotTexture,
             TextureAtlasRegion disabledSlotTexture,
             Supplier<Boolean> disabled)
         {
-            return (
-                new ClickableItemSlotElement(spatial, itemStack, disabled, slotTexture, disabledSlotTexture)
+            return new ClickableItemSlotElement(spatial, itemStack, disabled, slotTexture, disabledSlotTexture)
+            {
+                public boolean containsMouse(double x, double y)
                 {
-                    public boolean containsMouse(double x, double y)
+                    if (scrollMenuType == ScrollMenu.JEWEL &&
+                        !JewelSelectorTableScreen.this.jewelsElement.contains(x, y))
                     {
-                        if (scrollMenuType == ScrollMenu.JEWEL &&
-                            !JewelSelectorTableScreen.this.jewelsElement.contains(x, y))
-                        {
-                            return false;
-                        }
-                        else if (scrollMenuType == ScrollMenu.POUCH &&
-                            !JewelSelectorTableScreen.this.pouchesElement.contains(x, y))
-                        {
-                            return false;
-                        }
-                        else
-                        {
-                            return x < (double) this.right() && x >= (double) this.left() && y >= (double) this.top() &&
-                                y < (double) this.bottom();
-                        }
+                        return false;
                     }
-                }).overlayTexture(scrollMenuType == ScrollMenu.JEWEL ? ScreenTextures.JEWEL_NO_ITEM :
+                    else if (scrollMenuType == ScrollMenu.POUCH &&
+                        !JewelSelectorTableScreen.this.pouchesElement.contains(x, y))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return x < (double) this.right() && x >= (double) this.left() && y >= (double) this.top() &&
+                            y < (double) this.bottom();
+                    }
+                }
+            }.overlayTexture(scrollMenuType == ScrollMenu.JEWEL ? ScreenTextures.JEWEL_NO_ITEM :
                 MoreVaultTablesTextureAtlases.POUCH_NO_ITEM);
         }
 
@@ -500,19 +492,13 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
                     ItemStack stack = entry.getDisplayStack();
                     boolean disabled = entry.isDisabled();
                     ClickableItemSlotElement<?> clickableSlot =
-                        ScrollableClickableItemStackSelectorElement.this.makeElementSlot(Spatials.positionXY(0, 0)
-                                .translateX(column * ScrollableClickableItemStackSelectorElement.this.slotTexture.width())
-                                .translateY(row * ScrollableClickableItemStackSelectorElement.this.slotTexture.height()),
-                            () ->
-                            {
-                                return stack;
-                            },
+                        ScrollableClickableItemStackSelectorElement.this.makeElementSlot(Spatials.positionXY(0, 0).
+                                translateX(column * ScrollableClickableItemStackSelectorElement.this.slotTexture.width()).
+                                translateY(row * ScrollableClickableItemStackSelectorElement.this.slotTexture.height()),
+                            () -> stack,
                             ScrollableClickableItemStackSelectorElement.this.slotTexture,
                             ScrollableClickableItemStackSelectorElement.this.disabledSlotTexture,
-                            () ->
-                            {
-                                return disabled;
-                            });
+                            () -> disabled);
                     clickableSlot.whenClicked(new MouseClickRunnable(i, scrollMenuType));
                     entry.adjustSlot(clickableSlot);
                     this.addElement(clickableSlot);
@@ -531,33 +517,7 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
             }
 
 
-            protected void onSlotSelect(Consumer<ClickableItemSlotElement<?>> onSlotSelect)
-            {
-                this.onSlotSelect = onSlotSelect;
-            }
-
-
             public abstract List<E> getEntries();
-
-
-            public void onSelect(ClickableItemSlotElement<?> slot, E entry)
-            {
-                this.selectedElement = entry;
-                this.onSlotSelect.accept(slot);
-            }
-
-
-            @Nullable
-            public E getSelectedElement()
-            {
-                return this.selectedElement;
-            }
-
-            private Consumer<ClickableItemSlotElement<?>> onSlotSelect = (slot) ->
-            {
-            };
-
-            private E selectedElement = null;
         }
 
 
@@ -591,6 +551,7 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
             private final boolean isDisabled;
         }
 
+
         protected final SelectorModel<S> selectorModel;
 
         protected final TextureAtlasRegion slotTexture;
@@ -605,6 +566,9 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
     }
 
 
+    /**
+     * This class manages custom tooltip generation for items in scroll bars.
+     */
     private static class ItemSelectorWithTooltipEntry
         extends ScrollableClickableItemStackSelectorElement.ItemSelectorEntry
     {
