@@ -20,6 +20,7 @@ import iskallia.vault.client.gui.framework.screen.AbstractElementContainerScreen
 import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
 import iskallia.vault.client.gui.framework.text.LabelTextStyle;
+import iskallia.vault.init.ModItems;
 import iskallia.vault.item.JewelPouchItem;
 import lv.id.bonne.vaulthunters.morevaulttables.block.menu.JewelSelectorTableContainer;
 import lv.id.bonne.vaulthunters.morevaulttables.init.MoreVaultTablesTextureAtlases;
@@ -29,7 +30,6 @@ import lv.id.bonne.vaulthunters.morevaulttables.network.packets.SelectCraftingOb
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
@@ -160,19 +160,19 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
                 layout((screen, gui, parent, world) -> world.translateXY(gui).translateY(-5).translateZ(-10)));
 
             // Get rolled jewels
-            this.rolledJewelList.addAll(JewelPouchItem.getJewels(this.menu.getTileEntity().getSelectedPouch()));
-            int numberOfSlots = Mth.clamp(this.rolledJewelList.size(), 3, 4);
+            this.collectJewels();
 
-            for (int i = 0; i < numberOfSlots; i++)
+            for (int i = 0; i < 3; i++)
             {
                 final int finalI = i;
 
                 SelectableFakeItemSlotElement<?> slot = new SelectableFakeItemSlotElement<>(Spatials.positionXY(
-                    130,
-                    18 * (i + 1)),
+                    121,
+                    9 + 18 * (i + 1)),
                     () -> this.rolledJewelList.size() > finalI ? this.rolledJewelList.get(finalI).stack() : ItemStack.EMPTY,
                     () -> this.menu.getTileEntity().getSelectedPouch().isEmpty() ||
-                        this.getMenu().getTileEntity().getTotalSizeInJewels() >= 60).
+                        this.rolledJewelList.size() <= finalI ||
+                        this.menu.getTileEntity().getTotalSizeInJewels() >= 60).
                     setLabelStackCount().
                     layout((screen, gui, parent, world) -> world.translateXY(gui));
 
@@ -180,6 +180,19 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
                 this.addElement(slot);
                 this.elementList.add(slot);
             }
+
+            SelectableFakeItemSlotElement<?> slot = new SelectableFakeItemSlotElement<>(Spatials.positionXY(
+                139,
+                9 + 18 * 2),
+                () -> this.rolledJewelList.size() > 3 ? this.rolledJewelList.get(3).stack() : ItemStack.EMPTY,
+                () -> this.menu.getTileEntity().getSelectedPouch().isEmpty() ||
+                    this.getMenu().getTileEntity().getTotalSizeInJewels() >= 60).
+                setLabelStackCount().
+                layout((screen, gui, parent, world) -> world.translateXY(gui));
+
+            slot.whenClicked(new MouseClickRunnable(3, ScrollMenu.RESULT));
+            this.addElement(slot);
+            this.elementList.add(slot);
         }
     }
 
@@ -197,17 +210,19 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
             // Redraw all jewels from the pouch
             if (this.regenerate || !this.menu.getTileEntity().getSelectedPouch().isEmpty() && this.rolledJewelList.isEmpty())
             {
-                this.rolledJewelList.clear();
-                this.rolledJewelList.addAll(JewelPouchItem.getJewels(this.menu.getTileEntity().getSelectedPouch()));
+                this.collectJewels();
                 this.regenerate = false;
             }
 
             this.elementList.forEach(element -> {
-                element.tooltip(Tooltips.shift(
-                    Tooltips.multi(() -> element.getDisplayStack().getTooltipLines(Minecraft.getInstance().player,
-                        TooltipFlag.Default.NORMAL)),
-                    Tooltips.multi(() -> element.getDisplayStack().getTooltipLines(Minecraft.getInstance().player,
-                        TooltipFlag.Default.ADVANCED))));
+                if (!element.getDisplayStack().isEmpty())
+                {
+                    element.tooltip(Tooltips.shift(
+                        Tooltips.multi(() -> element.getDisplayStack().getTooltipLines(Minecraft.getInstance().player,
+                            TooltipFlag.Default.NORMAL)),
+                        Tooltips.multi(() -> element.getDisplayStack().getTooltipLines(Minecraft.getInstance().player,
+                            TooltipFlag.Default.ADVANCED))));
+                }
             });
 
             // Refresh other elements.
@@ -350,6 +365,28 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
     public void setRegenerate()
     {
         this.regenerate = true;
+    }
+
+
+    /**
+     * This method collects jewels and generates if they are not yet.
+     */
+    private void collectJewels()
+    {
+        this.rolledJewelList.clear();
+
+        if (this.menu.getTileEntity().getSelectedPouch().is(ModItems.JEWEL_POUCH))
+        {
+            List<JewelPouchItem.RolledJewel> rolledJewels = JewelPouchItem.getJewels(this.menu.getTileEntity().getSelectedPouch());
+
+            if (rolledJewels.isEmpty())
+            {
+                MoreVaultTablesNetwork.sendToServer(new MoveAndOpenObjectPacket(false));
+                return;
+            }
+
+            this.rolledJewelList.addAll(rolledJewels);
+        }
     }
 
 
