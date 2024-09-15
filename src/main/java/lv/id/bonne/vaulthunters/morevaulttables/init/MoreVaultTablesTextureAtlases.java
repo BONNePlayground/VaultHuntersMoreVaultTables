@@ -74,5 +74,11 @@ public class MoreVaultTablesTextureAtlases
 
     public static final TextureAtlasRegion POUCH_NO_ITEM =
         TextureAtlasRegion.of(MoreVaultTablesTextureAtlases.SLOT, MoreVaultTablesMod.of("gui/slot/pouch_no_item"));
+
+    public static final TextureAtlasRegion PACK_NO_ITEM =
+        TextureAtlasRegion.of(MoreVaultTablesTextureAtlases.SLOT, MoreVaultTablesMod.of("gui/slot/pack_no_item"));
+
+    public static final TextureAtlasRegion CARD_NO_ITEM =
+        TextureAtlasRegion.of(MoreVaultTablesTextureAtlases.SLOT, MoreVaultTablesMod.of("gui/slot/card_no_item"));
 }
 

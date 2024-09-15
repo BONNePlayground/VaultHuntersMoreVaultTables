@@ -8,6 +8,7 @@ package lv.id.bonne.vaulthunters.morevaulttables.registries;
 
 
 import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTablesMod;
+import lv.id.bonne.vaulthunters.morevaulttables.block.entity.CardSelectorTableTileEntity;
 import lv.id.bonne.vaulthunters.morevaulttables.block.entity.JewelSelectorTableTileEntity;
 import lv.id.bonne.vaulthunters.morevaulttables.init.MoreVaultTablesReferences;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -35,5 +36,14 @@ public class MoreVaultTablesTileEntityRegistry
         REGISTRY.register("jewel_selector_table_tile_entity",
             () -> BlockEntityType.Builder.of(JewelSelectorTableTileEntity::new,
                 MoreVaultTablesReferences.JEWEL_SELECTOR_TABLE_BLOCK).
+                build(null));
+
+    /**
+     * The Card Selector Block Entity registry
+     */
+    public static final RegistryObject<BlockEntityType<CardSelectorTableTileEntity>> CARD_SELECTOR_TILE_ENTITY =
+        REGISTRY.register("card_selector_table_tile_entity",
+            () -> BlockEntityType.Builder.of(CardSelectorTableTileEntity::new,
+                    MoreVaultTablesReferences.CARD_SELECTOR_TABLE_BLOCK).
                 build(null));
 }

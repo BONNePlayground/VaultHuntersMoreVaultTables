@@ -8,6 +8,7 @@ package lv.id.bonne.vaulthunters.morevaulttables.registries;
 
 
 import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTablesMod;
+import lv.id.bonne.vaulthunters.morevaulttables.block.menu.CardSelectorTableContainer;
 import lv.id.bonne.vaulthunters.morevaulttables.block.menu.JewelSelectorTableContainer;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.common.extensions.IForgeMenuType;
@@ -35,6 +36,17 @@ public class MoreVaultTablesContainersRegistry
         REGISTRY.register("jewel_selector_table_container",
             () -> IForgeMenuType.create((windowId, inventory, buffer) ->
                 new JewelSelectorTableContainer(windowId,
+                    inventory.player.getLevel(),
+                    buffer.readBlockPos(),
+                    inventory)));
+
+    /**
+     * The Card Selector Table Container registry
+     */
+    public static final RegistryObject<MenuType<CardSelectorTableContainer>> CARD_SELECTOR_TABLE_CONTAINER =
+        REGISTRY.register("card_selector_table_container",
+            () -> IForgeMenuType.create((windowId, inventory, buffer) ->
+                new CardSelectorTableContainer(windowId,
                     inventory.player.getLevel(),
                     buffer.readBlockPos(),
                     inventory)));

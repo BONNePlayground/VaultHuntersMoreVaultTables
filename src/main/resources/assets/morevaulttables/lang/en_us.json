@@ -1,5 +1,7 @@
 {
+  "block.morevaulttables.card_selector_table_block": "Card Selector Table Block",
   "block.morevaulttables.jewel_selector_table_block": "Jewel Selector Table Block",
+  "container.morevaulttables.card_selector_table_tile_entity": "Card Selector Table",
   "container.morevaulttables.jewel_selector_table_tile_entity": "Jewel Selector Table",
 
   "itemGroup.moretables": "More Vault Hunter Tables"

@@ -8,7 +8,9 @@ package lv.id.bonne.vaulthunters.morevaulttables.init;
 
 
 import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTablesMod;
+import lv.id.bonne.vaulthunters.morevaulttables.block.entity.CardSelectorTableTileEntity;
 import lv.id.bonne.vaulthunters.morevaulttables.block.entity.JewelSelectorTableTileEntity;
+import lv.id.bonne.vaulthunters.morevaulttables.block.menu.CardSelectorTableContainer;
 import lv.id.bonne.vaulthunters.morevaulttables.block.menu.JewelSelectorTableContainer;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.Block;
@@ -27,4 +29,13 @@ public class MoreVaultTablesReferences
 
     @ObjectHolder("jewel_selector_table_container")
     public static final MenuType<JewelSelectorTableContainer> JEWEL_SELECTOR_TABLE_CONTAINER = null;
+
+    @ObjectHolder("card_selector_table_block")
+    public static final Block CARD_SELECTOR_TABLE_BLOCK = null;
+
+    @ObjectHolder("card_selector_table_tile_entity")
+    public static final BlockEntityType<CardSelectorTableTileEntity> CARD_SELECTOR_TABLE_TILE_ENTITY = null;
+
+    @ObjectHolder("card_selector_table_container")
+    public static final MenuType<CardSelectorTableContainer> CARD_SELECTOR_TABLE_CONTAINER = null;
 }

@@ -10,6 +10,7 @@ package lv.id.bonne.vaulthunters.morevaulttables.registries;
 import java.util.function.Supplier;
 
 import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTablesMod;
+import lv.id.bonne.vaulthunters.morevaulttables.block.CardSelectorTableBlock;
 import lv.id.bonne.vaulthunters.morevaulttables.block.JewelSelectorTableBlock;
 import lv.id.bonne.vaulthunters.morevaulttables.init.MoreVaultTablesConstants;
 import net.minecraft.world.item.BlockItem;
@@ -75,6 +76,20 @@ public class MoreVaultTablesBlockRegistry
      */
     public static final RegistryObject<Block> JEWEL_SELECTOR_TABLE_BLOCK = registerBlock("jewel_selector_table_block",
         () -> new JewelSelectorTableBlock(
+            BlockBehaviour.Properties.copy(Blocks.STONECUTTER).
+                strength(4f).
+                sound(SoundType.CALCITE).
+                noOcclusion().
+                requiresCorrectToolForDrops(),
+            JEWEL_TABLE_SHAPE
+        )
+    );
+
+    /**
+     * The Card Selector Table Block
+     */
+    public static final RegistryObject<Block> CARD_SELECTOR_TABLE_BLOCK = registerBlock("card_selector_table_block",
+        () -> new CardSelectorTableBlock(
             BlockBehaviour.Properties.copy(Blocks.STONECUTTER).
                 strength(4f).
                 sound(SoundType.CALCITE).
