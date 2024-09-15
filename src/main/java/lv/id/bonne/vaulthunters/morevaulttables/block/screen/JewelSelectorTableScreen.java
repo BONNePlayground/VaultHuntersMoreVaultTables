@@ -186,6 +186,7 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
                 9 + 18 * 2),
                 () -> this.rolledJewelList.size() > 3 ? this.rolledJewelList.get(3).stack() : ItemStack.EMPTY,
                 () -> this.menu.getTileEntity().getSelectedPouch().isEmpty() ||
+                    this.rolledJewelList.size() <= 3 ||
                     this.getMenu().getTileEntity().getTotalSizeInJewels() >= 60).
                 setLabelStackCount().
                 layout((screen, gui, parent, world) -> world.translateXY(gui));
