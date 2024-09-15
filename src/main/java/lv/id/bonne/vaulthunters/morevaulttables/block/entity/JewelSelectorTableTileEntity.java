@@ -198,7 +198,7 @@ public class JewelSelectorTableTileEntity extends BlockEntity implements MenuPro
             this.totalSizeInJewels = jewels.getInt("size");
         }
 
-        if (tag.contains("jewels"))
+        if (tag.contains("pouches"))
         {
             CompoundTag pouches = tag.getCompound("pouches");
             this.outputInventory.load(pouches);
