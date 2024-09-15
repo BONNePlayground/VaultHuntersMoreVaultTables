@@ -63,9 +63,7 @@ public class MoreVaultTablesBlockRegistry
     /**
      * The constant JEWEL_TABLE_SHAPE.
      */
-    public static VoxelShape JEWEL_TABLE_SHAPE = Shapes.or(
-        Block.box(1.0, 10.0, 1.0, 15.0, 12.0, 15.0),
-        Block.box(2.0, 0.0, 2.0, 14.0, 10.0, 14.0));
+    public static VoxelShape JEWEL_TABLE_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 10.0, 16.0);
 
     /**
      * The Block registry
@@ -81,6 +79,7 @@ public class MoreVaultTablesBlockRegistry
             BlockBehaviour.Properties.copy(Blocks.STONECUTTER).
                 strength(4f).
                 sound(SoundType.CALCITE).
+                noOcclusion().
                 requiresCorrectToolForDrops(),
             JEWEL_TABLE_SHAPE
         )
