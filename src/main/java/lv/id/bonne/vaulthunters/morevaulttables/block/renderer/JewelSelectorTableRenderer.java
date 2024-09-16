@@ -6,7 +6,9 @@ import com.mojang.math.Vector3f;
 
 import org.jetbrains.annotations.NotNull;
 
+import iskallia.vault.block.JewelCraftingTableBlock;
 import iskallia.vault.block.ToolStationBlock;
+import lv.id.bonne.vaulthunters.morevaulttables.block.JewelSelectorTableBlock;
 import lv.id.bonne.vaulthunters.morevaulttables.block.entity.JewelSelectorTableTileEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -37,7 +39,7 @@ public class JewelSelectorTableRenderer implements BlockEntityRenderer<JewelSele
         {
             poseStack.pushPose();
             poseStack.translate(0.5, 0.83, 0.5);
-            Direction facing = jewelSelectorTable.getBlockState().getValue(ToolStationBlock.FACING);
+            Direction facing = jewelSelectorTable.getBlockState().getValue(JewelSelectorTableBlock.FACING);
             poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0F - facing.toYRot()));
             poseStack.scale(0.4f, 0.4f, 0.4f);
             poseStack.translate(-0.085f, 0.0f, -0.075f);

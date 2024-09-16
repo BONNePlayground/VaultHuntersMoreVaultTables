@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import org.jetbrains.annotations.NotNull;
 
-import iskallia.vault.block.ToolStationBlock;
+import lv.id.bonne.vaulthunters.morevaulttables.block.CardSelectorTableBlock;
 import lv.id.bonne.vaulthunters.morevaulttables.block.entity.CardSelectorTableTileEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -36,7 +36,7 @@ public class CardSelectorTableRenderer implements BlockEntityRenderer<CardSelect
         {
             poseStack.pushPose();
             poseStack.translate(0.5, 0.83, 0.5);
-            Direction facing = cardSelectorTable.getBlockState().getValue(ToolStationBlock.FACING);
+            Direction facing = cardSelectorTable.getBlockState().getValue(CardSelectorTableBlock.FACING);
             poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0F - facing.toYRot()));
             poseStack.scale(0.5F, 0.5F, 0.5F);
             poseStack.translate(0.0, 0.0, -0.10);
