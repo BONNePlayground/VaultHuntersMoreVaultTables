@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GCG",
+    "POP",
+    "PSP"
+  ],
+  "key": {
+    "P": {
+      "item": "the_vault:polished_vault_stone"
+    },
+    "G": {
+      "item": "the_vault:card_deck"
+    },
+    "C": {
+      "item": "minecraft:orange_carpet"
+    },
+    "O": {
+      "item": "the_vault:gem_pog"
+    },
+    "S": {
+      "tag": "forge:chests"
+    }
+  },
+  "result": {
+    "item": "morevaulttables:card_pack_opener_block",
+    "count": 1
+  }
+}
