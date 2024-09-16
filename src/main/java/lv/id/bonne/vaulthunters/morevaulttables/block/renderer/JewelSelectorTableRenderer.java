@@ -6,8 +6,6 @@ import com.mojang.math.Vector3f;
 
 import org.jetbrains.annotations.NotNull;
 
-import iskallia.vault.block.JewelCraftingTableBlock;
-import iskallia.vault.block.ToolStationBlock;
 import lv.id.bonne.vaulthunters.morevaulttables.block.JewelSelectorTableBlock;
 import lv.id.bonne.vaulthunters.morevaulttables.block.entity.JewelSelectorTableTileEntity;
 import net.minecraft.client.Minecraft;
