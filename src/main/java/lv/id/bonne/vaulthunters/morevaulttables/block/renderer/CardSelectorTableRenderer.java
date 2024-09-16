@@ -39,7 +39,7 @@ public class CardSelectorTableRenderer implements BlockEntityRenderer<CardSelect
             Direction facing = cardSelectorTable.getBlockState().getValue(ToolStationBlock.FACING);
             poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0F - facing.toYRot()));
             poseStack.scale(0.5F, 0.5F, 0.5F);
-            poseStack.translate(0.0, 0.0, -0.25);
+            poseStack.translate(0.0, 0.0, -0.10);
             poseStack.mulPose(Vector3f.XP.rotationDegrees(-90.0F));
             Minecraft minecraft = Minecraft.getInstance();
             minecraft.getItemRenderer().renderStatic(boosterPack,
