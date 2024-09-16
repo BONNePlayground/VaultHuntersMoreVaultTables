@@ -7,8 +7,8 @@ import com.mojang.math.Vector3f;
 import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
-import iskallia.vault.block.BlackMarketBlock;
 import iskallia.vault.item.JewelPouchItem;
+import lv.id.bonne.vaulthunters.morevaulttables.block.JewelSelectorTableBlock;
 import lv.id.bonne.vaulthunters.morevaulttables.block.entity.JewelSelectorTableTileEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -42,7 +42,7 @@ public class JewelSelectorTableRenderer implements BlockEntityRenderer<JewelSele
 
         if (world != null)
         {
-            Direction dir = jewelSelectorTable.getBlockState().getValue(BlackMarketBlock.FACING);
+            Direction dir = jewelSelectorTable.getBlockState().getValue(JewelSelectorTableBlock.FACING);
 
             if (!jewelSelectorTable.getSelectedPouch().isEmpty())
             {

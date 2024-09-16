@@ -8,6 +8,7 @@ import java.util.List;
 
 import iskallia.vault.block.BlackMarketBlock;
 import iskallia.vault.item.BoosterPackItem;
+import lv.id.bonne.vaulthunters.morevaulttables.block.CardSelectorTableBlock;
 import lv.id.bonne.vaulthunters.morevaulttables.block.entity.CardSelectorTableTileEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -41,7 +42,7 @@ public class CardSelectorTableRenderer implements BlockEntityRenderer<CardSelect
 
         if (world != null)
         {
-            Direction dir = cardSelectorTable.getBlockState().getValue(BlackMarketBlock.FACING);
+            Direction dir = cardSelectorTable.getBlockState().getValue(CardSelectorTableBlock.FACING);
 
             if (!cardSelectorTable.getSelectedPack().isEmpty())
             {

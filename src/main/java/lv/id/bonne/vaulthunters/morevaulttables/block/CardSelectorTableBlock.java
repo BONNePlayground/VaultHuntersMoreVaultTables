@@ -4,20 +4,26 @@ package lv.id.bonne.vaulthunters.morevaulttables.block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import iskallia.vault.block.base.FacedBlock;
+import java.util.Objects;
+
 import lv.id.bonne.vaulthunters.morevaulttables.block.entity.CardSelectorTableTileEntity;
 import lv.id.bonne.vaulthunters.morevaulttables.init.MoreVaultTablesReferences;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -28,14 +34,40 @@ import net.minecraftforge.network.NetworkHooks;
 /**
  * The Card selector table block.
  */
-public class CardSelectorTableBlock extends FacedBlock implements EntityBlock
+public class CardSelectorTableBlock extends HorizontalDirectionalBlock implements EntityBlock
 {
     /**
      * Instantiates a new Card selector table block.
      */
     public CardSelectorTableBlock(Properties properties, VoxelShape shape) {
         super(properties);
+        this.registerDefaultState(this.getStateDefinition().any().
+            setValue(FACING, Direction.NORTH));
         SHAPE = shape;
+    }
+
+
+    /**
+     * Create block state definition
+     * @param builder The definition builder.
+     */
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
+    {
+        builder.add(FACING);
+    }
+
+
+    /**
+     * This method allows to rotate block opposite to player.
+     * @param context The placement context.
+     * @return The new block state.
+     */
+    @Override
+    public BlockState getStateForPlacement(@NotNull BlockPlaceContext context)
+    {
+        return Objects.requireNonNull(super.getStateForPlacement(context)).
+            setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
 
