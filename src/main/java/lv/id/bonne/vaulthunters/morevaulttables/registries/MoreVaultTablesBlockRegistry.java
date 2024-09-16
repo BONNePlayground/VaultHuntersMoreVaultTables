@@ -74,7 +74,7 @@ public class MoreVaultTablesBlockRegistry
     /**
      * The Jewel Selector Table Block
      */
-    public static final RegistryObject<Block> JEWEL_SELECTOR_TABLE_BLOCK = registerBlock("jewel_selector_table_block",
+    public static final RegistryObject<Block> JEWEL_SELECTOR_TABLE_BLOCK = registerBlock("jewel_sack_opener_block",
         () -> new JewelSelectorTableBlock(
             BlockBehaviour.Properties.copy(Blocks.STONECUTTER).
                 strength(4f).
@@ -88,7 +88,7 @@ public class MoreVaultTablesBlockRegistry
     /**
      * The Card Selector Table Block
      */
-    public static final RegistryObject<Block> CARD_SELECTOR_TABLE_BLOCK = registerBlock("card_selector_table_block",
+    public static final RegistryObject<Block> CARD_SELECTOR_TABLE_BLOCK = registerBlock("card_pack_opener_block",
         () -> new CardSelectorTableBlock(
             BlockBehaviour.Properties.copy(Blocks.STONECUTTER).
                 strength(4f).

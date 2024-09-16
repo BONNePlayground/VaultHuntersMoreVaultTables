@@ -33,7 +33,7 @@ public class MoreVaultTablesTileEntityRegistry
      * The Jewel Selector Block Entity registry
      */
     public static final RegistryObject<BlockEntityType<JewelSelectorTableTileEntity>> JEWEL_SELECTOR_TILE_ENTITY =
-        REGISTRY.register("jewel_selector_table_tile_entity",
+        REGISTRY.register("jewel_sack_opener_tile_entity",
             () -> BlockEntityType.Builder.of(JewelSelectorTableTileEntity::new,
                 MoreVaultTablesReferences.JEWEL_SELECTOR_TABLE_BLOCK).
                 build(null));
@@ -42,7 +42,7 @@ public class MoreVaultTablesTileEntityRegistry
      * The Card Selector Block Entity registry
      */
     public static final RegistryObject<BlockEntityType<CardSelectorTableTileEntity>> CARD_SELECTOR_TILE_ENTITY =
-        REGISTRY.register("card_selector_table_tile_entity",
+        REGISTRY.register("card_pack_opener_tile_entity",
             () -> BlockEntityType.Builder.of(CardSelectorTableTileEntity::new,
                     MoreVaultTablesReferences.CARD_SELECTOR_TABLE_BLOCK).
                 build(null));

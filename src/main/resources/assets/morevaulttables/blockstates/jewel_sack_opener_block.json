@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "morevaulttables:block/jewel_sack_opener_block",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "morevaulttables:block/jewel_sack_opener_block"
+    },
+    "facing=south": {
+      "model": "morevaulttables:block/jewel_sack_opener_block",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "morevaulttables:block/jewel_sack_opener_block",
+      "y": 270
+    }
+  }
+}

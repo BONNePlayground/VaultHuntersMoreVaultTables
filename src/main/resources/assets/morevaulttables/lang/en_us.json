@@ -1,8 +1,8 @@
 {
-  "block.morevaulttables.card_selector_table_block": "Card Selector Table Block",
-  "block.morevaulttables.jewel_selector_table_block": "Jewel Selector Table Block",
-  "container.morevaulttables.card_selector_table_tile_entity": "Card Selector Table",
-  "container.morevaulttables.jewel_selector_table_tile_entity": "Jewel Selector Table",
+  "block.morevaulttables.card_pack_opener_block": "Card Pack Table Block",
+  "block.morevaulttables.jewel_sack_opener_block": "Jewel Sack Table Block",
+  "container.morevaulttables.card_pack_opener_tile_entity": "Card Pack Opener Table",
+  "container.morevaulttables.jewel_sack_opener_tile_entity": "Jewel Sack Opener Table",
 
   "itemGroup.moretables": "More Vault Hunter Tables"
 }

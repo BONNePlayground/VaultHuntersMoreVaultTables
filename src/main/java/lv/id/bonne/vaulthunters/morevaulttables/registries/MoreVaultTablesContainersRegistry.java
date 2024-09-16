@@ -33,7 +33,7 @@ public class MoreVaultTablesContainersRegistry
      * The Jewel Selector Table Container registry
      */
     public static final RegistryObject<MenuType<JewelSelectorTableContainer>> JEWEL_SELECTOR_TABLE_CONTAINER =
-        REGISTRY.register("jewel_selector_table_container",
+        REGISTRY.register("jewel_sack_opener_container",
             () -> IForgeMenuType.create((windowId, inventory, buffer) ->
                 new JewelSelectorTableContainer(windowId,
                     inventory.player.getLevel(),
@@ -44,7 +44,7 @@ public class MoreVaultTablesContainersRegistry
      * The Card Selector Table Container registry
      */
     public static final RegistryObject<MenuType<CardSelectorTableContainer>> CARD_SELECTOR_TABLE_CONTAINER =
-        REGISTRY.register("card_selector_table_container",
+        REGISTRY.register("card_pack_opener_container",
             () -> IForgeMenuType.create((windowId, inventory, buffer) ->
                 new CardSelectorTableContainer(windowId,
                     inventory.player.getLevel(),
