@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -60,10 +61,14 @@ public class MoreVaultTablesBlockRegistry
             new BlockItem(block.get(), new Item.Properties().tab(MoreVaultTablesConstants.MORE_TABLES)));
     }
 
+
     /**
      * The constant JEWEL_TABLE_SHAPE.
      */
-    public static VoxelShape JEWEL_TABLE_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 10.0, 16.0);
+    public static VoxelShape JEWEL_TABLE_SHAPE = Shapes.or(
+        Block.box(1.0, 10.0, 1.0, 15.0, 12.0, 15.0),
+        Block.box(2.0, 0.0, 2.0, 14.0, 10.0, 14.0));
+
 
     /**
      * The Block registry
