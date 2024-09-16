@@ -6,5 +6,9 @@
   "refmap": "morevaulttables.refmap.json",
   "mixins": [
     "JewelPouchItemInvoker"
+  ],
+  "client": [
+    "ClickableItemSlotElementMixin",
+    "FakeItemSlotElementMixin"
   ]
 }
