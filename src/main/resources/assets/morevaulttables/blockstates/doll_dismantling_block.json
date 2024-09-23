@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "morevaulttables:block/doll_dismantling_block",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "morevaulttables:block/doll_dismantling_block"
+    },
+    "facing=south": {
+      "model": "morevaulttables:block/doll_dismantling_block",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "morevaulttables:block/doll_dismantling_block",
+      "y": 270
+    }
+  }
+}

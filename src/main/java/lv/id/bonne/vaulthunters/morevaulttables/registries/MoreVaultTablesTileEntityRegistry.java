@@ -9,6 +9,7 @@ package lv.id.bonne.vaulthunters.morevaulttables.registries;
 
 import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTablesMod;
 import lv.id.bonne.vaulthunters.morevaulttables.block.entity.CardSelectorTableTileEntity;
+import lv.id.bonne.vaulthunters.morevaulttables.block.entity.DollDismantlingTileEntity;
 import lv.id.bonne.vaulthunters.morevaulttables.block.entity.JewelSelectorTableTileEntity;
 import lv.id.bonne.vaulthunters.morevaulttables.init.MoreVaultTablesReferences;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -45,5 +46,14 @@ public class MoreVaultTablesTileEntityRegistry
         REGISTRY.register("card_pack_opener_tile_entity",
             () -> BlockEntityType.Builder.of(CardSelectorTableTileEntity::new,
                     MoreVaultTablesReferences.CARD_SELECTOR_TABLE_BLOCK).
+                build(null));
+
+    /**
+     * The Doll Dissection Block Entity registry
+     */
+    public static final RegistryObject<BlockEntityType<DollDismantlingTileEntity>> DOLL_DISMANTLING_TILE_ENTITY =
+        REGISTRY.register("doll_dismantling_tile_entity",
+            () -> BlockEntityType.Builder.of(DollDismantlingTileEntity::new,
+                    MoreVaultTablesReferences.DOLL_DISMANTLING_BLOCK).
                 build(null));
 }

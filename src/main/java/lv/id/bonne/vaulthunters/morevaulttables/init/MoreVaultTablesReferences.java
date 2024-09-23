@@ -9,6 +9,7 @@ package lv.id.bonne.vaulthunters.morevaulttables.init;
 
 import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTablesMod;
 import lv.id.bonne.vaulthunters.morevaulttables.block.entity.CardSelectorTableTileEntity;
+import lv.id.bonne.vaulthunters.morevaulttables.block.entity.DollDismantlingTileEntity;
 import lv.id.bonne.vaulthunters.morevaulttables.block.entity.JewelSelectorTableTileEntity;
 import lv.id.bonne.vaulthunters.morevaulttables.block.menu.CardSelectorTableContainer;
 import lv.id.bonne.vaulthunters.morevaulttables.block.menu.JewelSelectorTableContainer;
@@ -38,4 +39,10 @@ public class MoreVaultTablesReferences
 
     @ObjectHolder("card_pack_opener_container")
     public static final MenuType<CardSelectorTableContainer> CARD_SELECTOR_TABLE_CONTAINER = null;
+
+    @ObjectHolder("doll_dismantling_block")
+    public static final Block DOLL_DISMANTLING_BLOCK = null;
+
+    @ObjectHolder("doll_dismantling_tile_entity")
+    public static final BlockEntityType<DollDismantlingTileEntity> DOLL_DISMANTLING_TILE_ENTITY = null;
 }

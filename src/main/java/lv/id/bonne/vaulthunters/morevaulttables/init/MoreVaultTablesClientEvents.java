@@ -8,7 +8,9 @@ package lv.id.bonne.vaulthunters.morevaulttables.init;
 
 
 import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTablesMod;
+import lv.id.bonne.vaulthunters.morevaulttables.block.entity.DollDismantlingTileEntity;
 import lv.id.bonne.vaulthunters.morevaulttables.block.renderer.CardSelectorTableRenderer;
+import lv.id.bonne.vaulthunters.morevaulttables.block.renderer.DollDismantlingRenderer;
 import lv.id.bonne.vaulthunters.morevaulttables.block.renderer.JewelSelectorTableRenderer;
 import lv.id.bonne.vaulthunters.morevaulttables.block.screen.CardSelectorTableScreen;
 import lv.id.bonne.vaulthunters.morevaulttables.block.screen.JewelSelectorTableScreen;
@@ -35,5 +37,8 @@ public class MoreVaultTablesClientEvents
         ItemBlockRenderTypes.setRenderLayer(MoreVaultTablesReferences.CARD_SELECTOR_TABLE_BLOCK, RenderType.cutout());
         BlockEntityRenderers.register(MoreVaultTablesReferences.CARD_SELECTOR_TABLE_TILE_ENTITY, CardSelectorTableRenderer::new);
         MenuScreens.register(MoreVaultTablesReferences.CARD_SELECTOR_TABLE_CONTAINER, CardSelectorTableScreen::new);
+
+        ItemBlockRenderTypes.setRenderLayer(MoreVaultTablesReferences.DOLL_DISMANTLING_BLOCK, RenderType.cutout());
+        BlockEntityRenderers.register(MoreVaultTablesReferences.DOLL_DISMANTLING_TILE_ENTITY, DollDismantlingRenderer::new);
     }
 }

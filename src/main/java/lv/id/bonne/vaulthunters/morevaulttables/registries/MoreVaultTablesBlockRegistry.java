@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 
 import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTablesMod;
 import lv.id.bonne.vaulthunters.morevaulttables.block.CardSelectorTableBlock;
+import lv.id.bonne.vaulthunters.morevaulttables.block.DollDismantlingBlock;
 import lv.id.bonne.vaulthunters.morevaulttables.block.JewelSelectorTableBlock;
 import lv.id.bonne.vaulthunters.morevaulttables.init.MoreVaultTablesConstants;
 import net.minecraft.world.item.BlockItem;
@@ -69,6 +70,12 @@ public class MoreVaultTablesBlockRegistry
         Block.box(1.0, 10.0, 1.0, 15.0, 12.0, 15.0),
         Block.box(2.0, 0.0, 2.0, 14.0, 10.0, 14.0));
 
+    /**
+     * The shape of doll dismantling table.
+     */
+    public static VoxelShape DOLL_DISMANTLING_SHAPE = Shapes.or(
+        Block.box(2.0, 0.0, 2.0, 14.0, 24.0, 14.0));
+
 
     /**
      * The Block registry
@@ -101,6 +108,20 @@ public class MoreVaultTablesBlockRegistry
                 noOcclusion().
                 requiresCorrectToolForDrops(),
             JEWEL_TABLE_SHAPE
+        )
+    );
+
+    /**
+     * The Doll Dissecting Table Block
+     */
+    public static final RegistryObject<Block> DOLL_DISMANTLING_BLOCK = registerBlock("doll_dismantling_block",
+        () -> new DollDismantlingBlock(
+            BlockBehaviour.Properties.copy(Blocks.GRASS_BLOCK).
+                strength(4f).
+                sound(SoundType.METAL).
+                noOcclusion().
+                requiresCorrectToolForDrops(),
+            DOLL_DISMANTLING_SHAPE
         )
     );
 }
