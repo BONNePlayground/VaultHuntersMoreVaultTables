@@ -83,6 +83,7 @@ public class DollDismantlingTileEntity extends BlockEntity
     public void updateDoll(ItemStack itemStack, ServerPlayer player)
     {
         this.inventory.setStackInSlot(0, itemStack);
+        this.extractionHandler = new ItemStackHandler(0);
 
         // Handle doll XP
         CompoundTag dollTag = itemStack.getOrCreateTag();
@@ -104,6 +105,8 @@ public class DollDismantlingTileEntity extends BlockEntity
 
                 DollDismantlingTileEntity.this.totalItemsInDoll = loot.size();
                 itemStack.getOrCreateTag().putLong("amount", loot.size());
+
+                this.extractionHandler = new DollItemExtractor(dollLootData);
             });
         }
     }
@@ -237,7 +240,7 @@ public class DollDismantlingTileEntity extends BlockEntity
     public void setRemoved()
     {
         super.setRemoved();
-        this.extractionCapability.invalidate();
+        LazyOptional.of(() -> this.extractionHandler).invalidate();
     }
 
 
@@ -257,7 +260,7 @@ public class DollDismantlingTileEntity extends BlockEntity
         {
             if (side == Direction.DOWN)
             {
-                return extractionCapability.cast();
+                return LazyOptional.of(() -> this.extractionHandler).cast();
             }
         }
         return super.getCapability(capability, side);
@@ -345,9 +348,6 @@ public class DollDismantlingTileEntity extends BlockEntity
     private DollMiniMeEntity miniMeEntity;
 
 
-    private LazyOptional<IItemHandler> extractionCapability = LazyOptional.of(() -> this.extractionHandler);
-
-
     /**
      * This variable stores output inventory that contains all card items  that are identified.
      */
@@ -362,10 +362,34 @@ public class DollDismantlingTileEntity extends BlockEntity
     };
 
 
-    private final IItemHandler extractionHandler = new ItemStackHandler(1)
+    private IItemHandler extractionHandler;
+
+
+    private class DollItemExtractor extends ItemStackHandler
     {
+        DollItemExtractor(DollLootData dollLootData)
+        {
+            super(dollLootData.getLoot().size());
+            this.dollLootData = dollLootData;
+        }
+
+
         @Override
-        @Nullable
+        public int getSlots()
+        {
+            return this.dollLootData.getLoot().size();
+        }
+
+        @Override
+        @NotNull
+        public ItemStack getStackInSlot(int slot)
+        {
+            return this.dollLootData.getLoot().get(slot);
+        }
+
+
+        @Override
+        @NotNull
         public ItemStack extractItem(int slot, int amount, boolean simulate)
         {
             if (amount == 0)
@@ -385,16 +409,12 @@ public class DollDismantlingTileEntity extends BlockEntity
                 return ItemStack.EMPTY;
             }
 
-            Optional<UUID> dollUUID = VaultDollItem.getDollUUID(inventory.getStackInSlot(0).getOrCreateTag());
-
-            if (dollUUID.isEmpty())
+            if (this.dollLootData == null)
             {
-                // unknown doll.
                 return ItemStack.EMPTY;
             }
 
-            DollLootData dollLootData = DollLootData.get((ServerLevel) level, dollUUID.get());
-            List<ItemStack> loot = dollLootData.getLoot();
+            List<ItemStack> loot = this.dollLootData.getLoot();
 
             if (loot.size() <= slot)
             {
@@ -427,7 +447,7 @@ public class DollDismantlingTileEntity extends BlockEntity
                 if (stackInSlot.getCount() < amount)
                 {
                     loot.remove(slot);
-                    dollLootData.setDirty();
+                    this.dollLootData.setDirty();
 
                     if (loot.isEmpty())
                     {
@@ -451,7 +471,7 @@ public class DollDismantlingTileEntity extends BlockEntity
                         loot.remove(slot);
                     }
 
-                    dollLootData.setDirty();
+                    this.dollLootData.setDirty();
 
                     if (loot.isEmpty())
                     {
@@ -465,5 +485,7 @@ public class DollDismantlingTileEntity extends BlockEntity
                 }
             }
         }
-    };
+
+        private final DollLootData dollLootData;
+    }
 }
