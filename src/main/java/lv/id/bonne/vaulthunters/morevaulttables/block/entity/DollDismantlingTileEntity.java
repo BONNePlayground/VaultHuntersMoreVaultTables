@@ -34,6 +34,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.ItemStackHandler;
 
 
@@ -105,8 +106,8 @@ public class DollDismantlingTileEntity extends BlockEntity
                 InventoryUtil.makeItemsRotten(loot);
                 dollLootData.setDirty();
 
-                DollDismantlingTileEntity.this.totalItemsInDoll = loot.size();
-                itemStack.getOrCreateTag().putLong("amount", loot.size());
+                DollDismantlingTileEntity.this.totalItemsInDoll = loot.stream().mapToInt(ItemStack::getCount).sum();
+                itemStack.getOrCreateTag().putLong("amount", DollDismantlingTileEntity.this.totalItemsInDoll);
 
                 this.extractionHandler = new DollItemExtractor(dollLootData);
             });
@@ -249,6 +250,8 @@ public class DollDismantlingTileEntity extends BlockEntity
                 } else {
                     tileEntity.soundTickCooldown--;
                 }
+
+                tileEntity.autoEjectItems(level, pos);
             } else {
                 // Reset the cooldown when no doll is present
                 tileEntity.soundTickCooldown = 0;
@@ -266,6 +269,96 @@ public class DollDismantlingTileEntity extends BlockEntity
             SoundSource.BLOCKS,
             0.3F,
             1.0F);
+    }
+
+
+    private void autoEjectItems(Level level, BlockPos pos) {
+        BlockPos belowPos = pos.below(); // Get the position below this block
+
+        // Get the BlockEntity below (if any)
+        BlockEntity belowBlockEntity = level.getBlockEntity(belowPos);
+
+        if (belowBlockEntity != null) {
+            // Check if the block below has an IItemHandler capability (i.e., it can accept items)
+            belowBlockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP).
+                ifPresent(belowHandler -> {
+                // Try to transfer items from this block's inventory to the inventory below
+                for (int i = 0; i < extractionHandler.getSlots(); i++) {
+                    ItemStack stackInSlot = extractionHandler.getStackInSlot(i);
+
+                    if (!stackInSlot.isEmpty()) {
+                        // Attempt to move the stack to the below inventory
+                        ItemStack remainingStack = transferStack(belowHandler, stackInSlot);
+
+                        if (remainingStack.isEmpty())
+                        {
+                            ((DollItemExtractor) extractionHandler).dollLootData.getLoot().remove(i);
+                            ((DollItemExtractor) extractionHandler).dollLootData.setDirty();
+                            this.totalItemsInDoll -= stackInSlot.getCount();
+
+                            this.triggerUpdate();
+
+                            break;
+                        }
+                        else if (remainingStack.getCount() != stackInSlot.getCount())
+                        {
+                            ((DollItemExtractor) extractionHandler).dollLootData.getLoot().set(0, remainingStack);
+                            ((DollItemExtractor) extractionHandler).dollLootData.setDirty();
+                            this.totalItemsInDoll = this.totalItemsInDoll - stackInSlot.getCount() + remainingStack.getCount();
+
+                            this.triggerUpdate();
+
+                            break;
+                        }
+                    }
+                }
+                setChanged(); // Mark the block entity as changed to save its state
+            });
+        }
+    }
+
+    private static boolean isEmpty(IItemHandler itemHandler) {
+        for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
+            ItemStack stackInSlot = itemHandler.getStackInSlot(slot);
+            if (stackInSlot.getCount() > 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+    private static ItemStack insertStack(IItemHandler destInventory, ItemStack stack, int slot) {
+        ItemStack itemstack = destInventory.getStackInSlot(slot);
+        if (destInventory.insertItem(slot, stack, true).getCount() != 64) {
+            boolean insertedItem = false;
+            boolean inventoryWasEmpty = isEmpty(destInventory);
+
+            if (itemstack.isEmpty()) {
+                destInventory.insertItem(slot, stack, false);
+                stack = ItemStack.EMPTY;
+                insertedItem = true;
+            } else if (ItemHandlerHelper.canItemStacksStack(itemstack, stack)) {
+                int originalSize = stack.getCount();
+                stack = destInventory.insertItem(slot, stack, false);
+                boolean var10000 = originalSize < stack.getCount();
+            }
+        }
+
+        return stack;
+    }
+
+
+
+    private ItemStack transferStack(IItemHandler targetHandler, ItemStack stack) {
+        for (int i = 0; i < targetHandler.getSlots(); i++) {
+            stack = insertStack(targetHandler, stack, i); // Try to insert the stack into the target inventory
+            if (stack.isEmpty()) {
+                break; // If the stack is fully inserted, break out of the loop
+            }
+        }
+        return stack; // Return the remaining stack (if any)
     }
 
 
@@ -488,7 +581,7 @@ public class DollDismantlingTileEntity extends BlockEntity
                         inventory.setStackInSlot(0, ItemStack.EMPTY);
                     }
 
-                    DollDismantlingTileEntity.this.totalItemsInDoll = loot.size();
+                    DollDismantlingTileEntity.this.totalItemsInDoll -= stackInSlot.getCount();
                     DollDismantlingTileEntity.this.triggerUpdate();
                     return stackInSlot;
                 }
@@ -512,13 +605,14 @@ public class DollDismantlingTileEntity extends BlockEntity
                         inventory.setStackInSlot(0, ItemStack.EMPTY);
                     }
 
-                    DollDismantlingTileEntity.this.totalItemsInDoll = loot.size();
+                    DollDismantlingTileEntity.this.totalItemsInDoll -= amount;
                     DollDismantlingTileEntity.this.triggerUpdate();
                     return copy;
                 }
             }
         }
 
-        private final DollLootData dollLootData;
+
+        protected final DollLootData dollLootData;
     }
 }
