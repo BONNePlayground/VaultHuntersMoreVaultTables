@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import iskallia.vault.item.VaultDollItem;
+import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTablesMod;
 import lv.id.bonne.vaulthunters.morevaulttables.block.entity.DollDismantlingTileEntity;
 import lv.id.bonne.vaulthunters.morevaulttables.init.MoreVaultTablesReferences;
 import net.minecraft.core.BlockPos;
@@ -28,6 +29,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 
+/**
+ * This mixin allows to block Vault Doll placement on ground if enabled in config.
+ */
 @Mixin(value = VaultDollItem.class)
 public class VaultDollItemMixin
 {
@@ -48,10 +52,12 @@ public class VaultDollItemMixin
     {
         if (blockState.is(MoreVaultTablesReferences.DOLL_DISMANTLING_BLOCK))
         {
+            // This manages vault doll placement into dismantler, if it is empty.
+
             DollDismantlingTileEntity blockEntity =
                 (DollDismantlingTileEntity) level.getBlockEntity(clickedPos);
 
-            if (blockEntity.getDoll().isEmpty())
+            if (blockEntity != null && blockEntity.getDoll().isEmpty())
             {
                 ItemStack clone = stack.copy();
                 clone.setCount(1);
@@ -59,13 +65,11 @@ public class VaultDollItemMixin
 
                 blockEntity.updateDoll(clone, (ServerPlayer) player);
                 cir.setReturnValue(InteractionResult.SUCCESS);
-            }
-            else
-            {
-                cir.setReturnValue(InteractionResult.FAIL);
+                return;
             }
         }
-        else
+
+        if (MoreVaultTablesMod.CONFIGURATION.getBlockVaultDolls())
         {
             cir.setReturnValue(InteractionResult.FAIL);
         }
