@@ -5,10 +5,7 @@ import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
 
 import lv.id.bonne.vaulthunters.morevaulttables.network.MoreVaultTablesNetwork;
-import lv.id.bonne.vaulthunters.morevaulttables.registries.MoreVaultTablesBlockRegistry;
-import lv.id.bonne.vaulthunters.morevaulttables.registries.MoreVaultTablesContainersRegistry;
-import lv.id.bonne.vaulthunters.morevaulttables.registries.MoreVaultTablesItemRegistry;
-import lv.id.bonne.vaulthunters.morevaulttables.registries.MoreVaultTablesTileEntityRegistry;
+import lv.id.bonne.vaulthunters.morevaulttables.registries.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -28,6 +25,7 @@ public class MoreVaultTablesMod
         MoreVaultTablesBlockRegistry.REGISTRY.register(modEventBus);
         MoreVaultTablesTileEntityRegistry.REGISTRY.register(modEventBus);
         MoreVaultTablesContainersRegistry.REGISTRY.register(modEventBus);
+        MoreVaultTablesSoundRegistry.REGISTRY.register(modEventBus);
     }
 
 

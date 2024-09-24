@@ -6,7 +6,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import iskallia.vault.entity.entity.DollMiniMeEntity;
 import iskallia.vault.init.ModEntities;
@@ -16,6 +15,7 @@ import iskallia.vault.util.InventoryUtil;
 import iskallia.vault.world.data.DollLootData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import lv.id.bonne.vaulthunters.morevaulttables.init.MoreVaultTablesReferences;
+import lv.id.bonne.vaulthunters.morevaulttables.registries.MoreVaultTablesSoundRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -23,8 +23,10 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -234,6 +236,37 @@ public class DollDismantlingTileEntity extends BlockEntity
         }
     }
 
+
+    public static void tick(Level level, BlockPos pos, BlockState blockState, DollDismantlingTileEntity tileEntity)
+    {
+        if (!level.isClientSide) {
+            // If doll is present and not air, trigger the sound loop
+            if (!tileEntity.getDoll().isEmpty()) {
+                // Play sound every 2 seconds
+                if (tileEntity.soundTickCooldown <= 0) {
+                    tileEntity.playDollSound(level, pos);
+                    tileEntity.soundTickCooldown = 40;
+                } else {
+                    tileEntity.soundTickCooldown--;
+                }
+            } else {
+                // Reset the cooldown when no doll is present
+                tileEntity.soundTickCooldown = 0;
+            }
+        }
+    }
+
+    private int soundTickCooldown = 0;
+
+    private void playDollSound(Level level, BlockPos pos)
+    {
+        level.playSound(null,
+            pos,
+            MoreVaultTablesSoundRegistry.BLENDER.get(),
+            SoundSource.BLOCKS,
+            0.3F,
+            1.0F);
+    }
 
 
     @Override
