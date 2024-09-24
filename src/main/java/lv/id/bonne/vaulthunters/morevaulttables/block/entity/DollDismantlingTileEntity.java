@@ -10,6 +10,7 @@ import java.util.Optional;
 import iskallia.vault.entity.entity.DollMiniMeEntity;
 import iskallia.vault.init.ModEntities;
 import iskallia.vault.init.ModItems;
+import iskallia.vault.integration.IntegrationRefinedStorage;
 import iskallia.vault.item.VaultDollItem;
 import iskallia.vault.util.InventoryUtil;
 import iskallia.vault.world.data.DollLootData;
@@ -32,6 +33,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
@@ -156,6 +159,8 @@ public class DollDismantlingTileEntity extends BlockEntity
                 this.miniMeEntity = null;
             }
         }
+
+        energyStorage.receiveEnergy(tag.getInt("Energy"), false); // Load energy storage from NBT
     }
 
 
@@ -178,6 +183,8 @@ public class DollDismantlingTileEntity extends BlockEntity
         }
 
         tag.put("doll", doll);
+
+        tag.putInt("Energy", energyStorage.getEnergyStored()); // Save energy storage to NBT
     }
 
 
@@ -251,7 +258,11 @@ public class DollDismantlingTileEntity extends BlockEntity
                     tileEntity.soundTickCooldown--;
                 }
 
-                tileEntity.autoEjectItems(level, pos);
+                if (tileEntity.canOperate())
+                {
+                    tileEntity.autoEjectItems(level, pos);
+                    tileEntity.consumeEnergy(ENERGY_CONSUMPTION);
+                }
             } else {
                 // Reset the cooldown when no doll is present
                 tileEntity.soundTickCooldown = 0;
@@ -367,7 +378,16 @@ public class DollDismantlingTileEntity extends BlockEntity
     {
         super.setRemoved();
         LazyOptional.of(() -> this.extractionHandler).invalidate();
+        LazyOptional.of(() -> this.energyStorage).invalidate();
     }
+
+    @Override
+    public void invalidateCaps() {
+        super.invalidateCaps();
+        LazyOptional.of(() -> this.extractionHandler).invalidate();
+        LazyOptional.of(() -> this.energyStorage).invalidate();
+    }
+
 
 
     /**
@@ -382,6 +402,14 @@ public class DollDismantlingTileEntity extends BlockEntity
     @Override
     public <T> LazyOptional<T> getCapability(@NotNull Capability<T> capability, @Nullable Direction side)
     {
+        if (IntegrationRefinedStorage.shouldPreventImportingCapability(this.getLevel(), this.getBlockPos(), side))
+        {
+            return super.getCapability(capability, side);
+        }
+
+        if (capability == CapabilityEnergy.ENERGY) {
+            return LazyOptional.of(() -> energyStorage).cast();
+        }
         if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
         {
             if (side == Direction.DOWN)
@@ -424,6 +452,15 @@ public class DollDismantlingTileEntity extends BlockEntity
         return this.miniMeEntity;
     }
 
+    // Check if there is enough energy to operate
+    private boolean canOperate() {
+        return energyStorage.getEnergyStored() >= ENERGY_CONSUMPTION;
+    }
+
+    // Method to consume energy from the energy storage
+    private void consumeEnergy(int amount) {
+        energyStorage.extractEnergy(amount, false);
+    }
 
     /**
      * This method sets mini me entity for this tile.
@@ -615,4 +652,12 @@ public class DollDismantlingTileEntity extends BlockEntity
 
         protected final DollLootData dollLootData;
     }
+
+
+    private static final int MAX_ENERGY = 1000; // Maximum energy the block can store
+
+    private static final int ENERGY_CONSUMPTION = 16; // Energy consumed per operation
+
+    private final EnergyStorage energyStorage = new EnergyStorage(MAX_ENERGY, 100, 100);
+
 }
