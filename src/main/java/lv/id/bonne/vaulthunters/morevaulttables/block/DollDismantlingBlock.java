@@ -42,7 +42,8 @@ public class DollDismantlingBlock extends HorizontalDirectionalBlock implements 
     /**
      * Instantiates a new Doll Dissecting table block.
      */
-    public DollDismantlingBlock(Properties properties, VoxelShape shape) {
+    public DollDismantlingBlock(Properties properties, VoxelShape shape)
+    {
         super(properties);
         this.registerDefaultState(this.getStateDefinition().any().
             setValue(FACING, Direction.NORTH));
@@ -112,17 +113,15 @@ public class DollDismantlingBlock extends HorizontalDirectionalBlock implements 
         @NotNull InteractionHand hand,
         @NotNull BlockHitResult hit)
     {
-        if (level.isClientSide())
-        {
-            return InteractionResult.SUCCESS;
-        }
-        else if (player instanceof ServerPlayer serverPlayer)
+        if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer)
         {
             BlockEntity tile = level.getBlockEntity(pos);
 
             if (tile instanceof DollDismantlingTileEntity table)
             {
                 ItemStack stack = serverPlayer.getMainHandItem();
+
+                // This is the same logic as vault doll placement on ground.
 
                 if (ServerVaults.get(serverPlayer.getLevel()).isEmpty() &&
                     !VHSmpUtil.isArenaWorld(player) &&
@@ -144,6 +143,7 @@ public class DollDismantlingBlock extends HorizontalDirectionalBlock implements 
                     serverPlayer.getMainHandItem().shrink(1);
 
                     table.updateDoll(copy, serverPlayer);
+
                     return InteractionResult.SUCCESS;
                 }
                 else
@@ -151,15 +151,9 @@ public class DollDismantlingBlock extends HorizontalDirectionalBlock implements 
                     return InteractionResult.FAIL;
                 }
             }
-            else
-            {
-                return InteractionResult.SUCCESS;
-            }
         }
-        else
-        {
-            return InteractionResult.SUCCESS;
-        }
+
+        return InteractionResult.SUCCESS;
     }
 
 
@@ -172,7 +166,10 @@ public class DollDismantlingBlock extends HorizontalDirectionalBlock implements 
      * @return {@code false} always
      */
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter level, BlockPos pos, PathComputationType type)
+    public boolean isPathfindable(@NotNull BlockState state,
+        @NotNull BlockGetter level,
+        @NotNull BlockPos pos,
+        @NotNull PathComputationType type)
     {
         return false;
     }
@@ -187,7 +184,11 @@ public class DollDismantlingBlock extends HorizontalDirectionalBlock implements 
      * @param isMoving Boolean if block is moving.
      */
     @Override
-    public void onRemove(BlockState state, @NotNull Level level, @NotNull BlockPos pos, BlockState newState, boolean isMoving)
+    public void onRemove(BlockState state,
+        @NotNull Level level,
+        @NotNull BlockPos pos,
+        BlockState newState,
+        boolean isMoving)
     {
         if (!state.is(newState.getBlock()))
         {
@@ -215,19 +216,41 @@ public class DollDismantlingBlock extends HorizontalDirectionalBlock implements 
      * @return New block entity.
      */
     @Nullable
+    @Override
     public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state)
     {
         return MoreVaultTablesReferences.DOLL_DISMANTLING_TILE_ENTITY.create(pos, state);
     }
 
 
+    /**
+     * This method manages entity ticking for this block.
+     * @param level The level where block is ticking
+     * @param state The block state.
+     * @param type The block type.
+     * @return Ticked block entity.
+     * @param <T> Block entity type.
+     */
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return createTickerHelper(type, MoreVaultTablesReferences.DOLL_DISMANTLING_TILE_ENTITY, DollDismantlingTileEntity::tick);
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level level,
+        @NotNull BlockState state,
+        @NotNull BlockEntityType<T> type)
+    {
+        return createTickerHelper(type,
+            MoreVaultTablesReferences.DOLL_DISMANTLING_TILE_ENTITY,
+            DollDismantlingTileEntity::tick);
     }
 
+
+    /**
+     * This method creates requested tick block.
+     */
     @Nullable
-    public static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(BlockEntityType<A> type, BlockEntityType<E> expectedType, BlockEntityTicker<? super E> ticker) {
+    public static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(
+        BlockEntityType<A> type,
+        BlockEntityType<E> expectedType,
+        BlockEntityTicker<? super E> ticker)
+    {
         return type == expectedType ? (BlockEntityTicker<A>) ticker : null;
     }
 
