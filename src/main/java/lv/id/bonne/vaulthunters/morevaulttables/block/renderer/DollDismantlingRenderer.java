@@ -6,6 +6,7 @@ import com.mojang.math.Vector3f;
 import org.jetbrains.annotations.NotNull;
 
 import iskallia.vault.entity.entity.DollMiniMeEntity;
+import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTablesMod;
 import lv.id.bonne.vaulthunters.morevaulttables.block.entity.DollDismantlingTileEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -58,7 +59,7 @@ public class DollDismantlingRenderer implements BlockEntityRenderer<DollDismantl
         poseStack.scale(0.6f, 0.6f, 0.6f);
 
         long gameTime = tileEntity.getLevel().getGameTime();
-        float rotationAngle = (gameTime % 360L) * 25.0f;
+        float rotationAngle = (gameTime % 360L) * (float) MoreVaultTablesMod.CONFIGURATION.getDollDismantlerRotationSpeed();
 
         poseStack.mulPose(Vector3f.YP.rotationDegrees(rotationAngle));
 

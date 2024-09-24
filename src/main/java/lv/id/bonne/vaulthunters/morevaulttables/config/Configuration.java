@@ -44,8 +44,13 @@ public class Configuration
 
         this.dollDismantlerVolume = builder.
             comment("This option allows to change the sound for Doll Dismantler operation.").
-            comment("By default: 0.5f").
+            comment("By default: 0.5").
             defineInRange("doll-dismantler-volume", 0.5f, 0, 1f);
+
+        this.dollDismantlerRotationSpeed = builder.
+            comment("This option allows to change the rotation speed for Doll inside Dismantler.").
+            comment("By default: 25").
+            defineInRange("doll-dismantler-volume", 25d, 0, 2000);
 
         Configuration.GENERAL_SPEC = builder.build();
     }
@@ -106,6 +111,17 @@ public class Configuration
     }
 
 
+    /**
+     * Gets doll dismantler rotation speed.
+     *
+     * @return the doll dismantler rotation speed
+     */
+    public double getDollDismantlerRotationSpeed()
+    {
+        return this.dollDismantlerRotationSpeed.get();
+    }
+
+
     // ---------------------------------------------------------------------
     // Section: Variables
     // ---------------------------------------------------------------------
@@ -135,6 +151,11 @@ public class Configuration
      * Stores config variable value.
      */
     private final ForgeConfigSpec.DoubleValue dollDismantlerVolume;
+
+    /**
+     * Stores config variable value.
+     */
+    private final ForgeConfigSpec.DoubleValue dollDismantlerRotationSpeed;
 
     /**
      * The general config spec.
