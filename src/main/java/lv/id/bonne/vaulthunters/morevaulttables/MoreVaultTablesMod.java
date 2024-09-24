@@ -4,11 +4,14 @@ package lv.id.bonne.vaulthunters.morevaulttables;
 import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
 
+import lv.id.bonne.vaulthunters.morevaulttables.config.Configuration;
 import lv.id.bonne.vaulthunters.morevaulttables.network.MoreVaultTablesNetwork;
 import lv.id.bonne.vaulthunters.morevaulttables.registries.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 
@@ -18,6 +21,12 @@ public class MoreVaultTablesMod
 {
     public MoreVaultTablesMod()
     {
+        MoreVaultTablesMod.CONFIGURATION = new Configuration();
+
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON,
+            Configuration.GENERAL_SPEC,
+            "more_vault_tables_config.toml");
+
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         MoreVaultTablesNetwork.register();
 
@@ -43,4 +52,9 @@ public class MoreVaultTablesMod
      * The logger for mod
      */
     public static final Logger LOGGER = LogUtils.getLogger();
+
+    /**
+     * The configuration file for the mod.
+     */
+    public static Configuration CONFIGURATION;
 }
