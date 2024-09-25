@@ -315,8 +315,33 @@ public class DollDismantlingTileEntity extends BlockEntity
 
                         if (!stackInSlot.isEmpty())
                         {
+                            int count = stackInSlot.getCount();
+                            boolean repopulate = count > stackInSlot.getMaxStackSize();
+
+                            if  (repopulate)
+                            {
+                                // Adjust the size of stack to be max stack size.
+                                stackInSlot = stackInSlot.copy();
+                                stackInSlot.setCount(stackInSlot.getMaxStackSize());
+                                count -= stackInSlot.getMaxStackSize();
+                            }
+
                             // Attempt to move the stack to the below inventory
                             ItemStack remainingStack = this.transferStack(belowHandler, stackInSlot);
+
+                            if (repopulate)
+                            {
+                                // Add missing stack count to remainingStack item.
+                                if (remainingStack.isEmpty())
+                                {
+                                    remainingStack = stackInSlot.copy();
+                                    remainingStack.setCount(count);
+                                }
+                                else
+                                {
+                                    remainingStack.setCount(remainingStack.getCount() + count);
+                                }
+                            }
 
                             if (this.extractionHandler.transferStack(slot, stackInSlot, remainingStack))
                             {
@@ -345,7 +370,7 @@ public class DollDismantlingTileEntity extends BlockEntity
         {
             ItemStack stackInSlot = targetHandler.getStackInSlot(slot);
 
-            if (targetHandler.insertItem(slot, stack, true).getCount() != stack.getMaxStackSize())
+            if (targetHandler.insertItem(slot, stack, true).getCount() != stack.getCount())
             {
                 if (stackInSlot.isEmpty())
                 {
