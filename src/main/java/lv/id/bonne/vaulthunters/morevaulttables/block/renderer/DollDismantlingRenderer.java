@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 
 import iskallia.vault.entity.entity.DollMiniMeEntity;
 import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTablesMod;
-import lv.id.bonne.vaulthunters.morevaulttables.block.CardSelectorTableBlock;
 import lv.id.bonne.vaulthunters.morevaulttables.block.DollDismantlingBlock;
 import lv.id.bonne.vaulthunters.morevaulttables.block.entity.DollDismantlingTileEntity;
 import net.minecraft.client.Minecraft;
