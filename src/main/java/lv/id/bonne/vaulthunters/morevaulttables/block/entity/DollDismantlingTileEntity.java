@@ -464,8 +464,14 @@ public class DollDismantlingTileEntity extends BlockEntity
                         }
                     }
 
-                    this.autoEjectItems();
+                    if (this.extractionTick <= 0)
+                    {
+                        this.autoEjectItems();
+                        this.extractionTick = MoreVaultTablesMod.CONFIGURATION.getDollDismantlerExtractionSpeed();
+                    }
+
                     this.consumeEnergy();
+                    this.extractionTick--;
                 }
             }
             else
@@ -799,6 +805,11 @@ public class DollDismantlingTileEntity extends BlockEntity
      * This variable stores cooldown before next sound should be played.
      */
     private int soundTickCooldown = 0;
+
+    /**
+     * This variable stores extraction tick count.
+     */
+    private int extractionTick = 0;
 
     /**
      * This variable stores how many items are in the doll currently.

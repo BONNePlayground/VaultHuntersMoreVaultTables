@@ -42,6 +42,12 @@ public class Configuration
                 "By default: 100").
             defineInRange("doll-dismantler-energy-transfer", 100, 0, Integer.MAX_VALUE);
 
+        this.dollDismantlerExtractionSpeed = builder.
+            comment("This option allows to change the extraction speed for doll dismantler.",
+                "The extraction speed is defined by `stack per ticks`.",
+                "By default: 5").
+            defineInRange("doll-dismantler-extraction-speed", 5, 1, 100);
+
         this.dollDismantlerVolume = builder.
             comment("This option allows to change the sound for Doll Dismantler operation.",
                 "By default: 0.5").
@@ -122,6 +128,17 @@ public class Configuration
     }
 
 
+    /**
+     * Gets doll dismantler extraction speed in ticks.
+     *
+     * @return the doll dismantler extraction speed in ticks
+     */
+    public int getDollDismantlerExtractionSpeed()
+    {
+        return this.dollDismantlerExtractionSpeed.get();
+    }
+
+
     // ---------------------------------------------------------------------
     // Section: Variables
     // ---------------------------------------------------------------------
@@ -156,6 +173,11 @@ public class Configuration
      * Stores config variable value.
      */
     private final ForgeConfigSpec.DoubleValue dollDismantlerRotationSpeed;
+
+    /**
+     * Stores config variable value.
+     */
+    private final ForgeConfigSpec.IntValue dollDismantlerExtractionSpeed;
 
     /**
      * The general config spec.
