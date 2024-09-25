@@ -74,7 +74,12 @@ public class MoreVaultTablesBlockRegistry
      * The shape of doll dismantling table.
      */
     public static VoxelShape DOLL_DISMANTLING_SHAPE = Shapes.or(
-        Block.box(2.0, 0.0, 2.0, 14.0, 24.0, 14.0));
+        Block.box(2.0, 0.0, 2.0, 14.0, 8.0, 14.0),
+        Block.box(4.0, 8.0, 4.0, 12.0, 10.0, 12.0),
+        Block.box(3.0, 10.0, 3.0, 13.0, 20.0, 13.0),
+        Block.box(2.0, 20.0, 2.0, 14.0, 21.0, 14.0),
+        Block.box(3.0, 21.0, 3.0, 13.0, 23.0, 13.0),
+        Block.box(6.0, 23.0, 6.0, 10.0, 24.0, 10.0));
 
 
     /**
