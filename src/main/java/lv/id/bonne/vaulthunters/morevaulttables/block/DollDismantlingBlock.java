@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
+import iskallia.vault.init.ModItems;
 import iskallia.vault.util.VHSmpUtil;
 import iskallia.vault.world.data.ServerVaults;
 import lv.id.bonne.vaulthunters.morevaulttables.block.entity.DollDismantlingTileEntity;
@@ -123,7 +124,8 @@ public class DollDismantlingBlock extends HorizontalDirectionalBlock implements 
 
                 // This is the same logic as vault doll placement on ground.
 
-                if (ServerVaults.get(serverPlayer.getLevel()).isEmpty() &&
+                if (stack.is(ModItems.VAULT_DOLL) &&
+                    ServerVaults.get(serverPlayer.getLevel()).isEmpty() &&
                     !VHSmpUtil.isArenaWorld(player) &&
                     stack.getOrCreateTag().contains("vaultUUID") &&
                     table.playerCanInsertDoll(stack, player))
