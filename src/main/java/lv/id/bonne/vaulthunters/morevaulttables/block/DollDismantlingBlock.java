@@ -126,7 +126,7 @@ public class DollDismantlingBlock extends HorizontalDirectionalBlock implements 
                 if (ServerVaults.get(serverPlayer.getLevel()).isEmpty() &&
                     !VHSmpUtil.isArenaWorld(player) &&
                     stack.getOrCreateTag().contains("vaultUUID") &&
-                    !table.playerCannotInsertDoll(stack, player))
+                    table.playerCanInsertDoll(stack, player))
                 {
                     if (!table.getDoll().isEmpty())
                     {
@@ -238,7 +238,7 @@ public class DollDismantlingBlock extends HorizontalDirectionalBlock implements 
     {
         return createTickerHelper(type,
             MoreVaultTablesReferences.DOLL_DISMANTLING_TILE_ENTITY,
-            DollDismantlingTileEntity::tick);
+            (world, pos, blockState, tileEntity) -> tileEntity.tick());
     }
 
 

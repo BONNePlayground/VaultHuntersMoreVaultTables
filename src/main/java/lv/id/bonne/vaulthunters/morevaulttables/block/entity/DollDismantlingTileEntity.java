@@ -14,19 +14,18 @@ import iskallia.vault.item.VaultDollItem;
 import iskallia.vault.util.InventoryUtil;
 import iskallia.vault.world.data.DollLootData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
+import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTablesMod;
 import lv.id.bonne.vaulthunters.morevaulttables.init.MoreVaultTablesReferences;
 import lv.id.bonne.vaulthunters.morevaulttables.registries.MoreVaultTablesSoundRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -54,19 +53,22 @@ public class DollDismantlingTileEntity extends BlockEntity
     public DollDismantlingTileEntity(BlockPos pos, BlockState state)
     {
         super(MoreVaultTablesReferences.DOLL_DISMANTLING_TILE_ENTITY, pos, state);
-    }
 
+        // Item extraction related stuff
+        this.extractionHandler = new DollItemExtractor();
+        this.extractionCapability = LazyOptional.of(() -> this.extractionHandler);
 
-    /**
-     * Still valid boolean.
-     *
-     * @param player the player
-     * @return the boolean
-     */
-    public boolean stillValid(Player player)
-    {
-        return this.level != null &&
-            this.level.getBlockEntity(this.worldPosition) == this;
+        // Energy related stuff.
+        int energyStorage = MoreVaultTablesMod.CONFIGURATION.getDollDismantlerEnergyStorage();
+        int energyTransfer = MoreVaultTablesMod.CONFIGURATION.getDollDismantlerEnergyTransfer();
+
+        this.energyConsumption = MoreVaultTablesMod.CONFIGURATION.getDollDismantlerEnergyConsumption();
+        this.energyStorage = new EnergyStorage(energyStorage, energyTransfer, energyTransfer);
+
+        this.energyCapability = LazyOptional.of(() -> this.energyStorage);
+
+        // Volume
+        this.volume = MoreVaultTablesMod.CONFIGURATION.getDollDismantlerVolume();
     }
 
 
@@ -89,32 +91,57 @@ public class DollDismantlingTileEntity extends BlockEntity
     public void updateDoll(ItemStack itemStack, ServerPlayer player)
     {
         this.inventory.setStackInSlot(0, itemStack);
-        this.extractionHandler = new ItemStackHandler(0);
 
-        // Handle doll XP
         CompoundTag dollTag = itemStack.getOrCreateTag();
 
-        if (!dollTag.contains("rewarded"))
+        VaultDollItem.getDollUUID(dollTag).ifPresentOrElse(dollUuid ->
         {
-            // Assign number of items for juicer.
-            VaultDollItem.getDollUUID(dollTag).ifPresent(dollUuid ->
+            if (!dollTag.contains(DollDismantlingTileEntity.REWARD))
             {
+                // Handle XP assigning to the player.
                 PlayerVaultStatsData statsData = PlayerVaultStatsData.get(player.getLevel());
                 statsData.addVaultExp(player, VaultDollItem.getExperience(dollTag));
+                dollTag.putBoolean(DollDismantlingTileEntity.REWARD, true);
+            }
 
-                dollTag.putBoolean("rewarded", true);
+            DollLootData dollLootData = DollLootData.get(player.getLevel(), dollUuid);
+            List<ItemStack> loot = dollLootData.getLoot();
 
-                DollLootData dollLootData = DollLootData.get(player.getLevel(), dollUuid);
-                List<ItemStack> loot = dollLootData.getLoot();
+            // Count items from all item-stacks
+            DollDismantlingTileEntity.this.totalItemsInDoll = loot.stream().mapToInt(ItemStack::getCount).sum();
+
+            if (!dollTag.contains(DollDismantlingTileEntity.AMOUNT))
+            {
+                // Update items as rotten once on updating vault doll.
                 InventoryUtil.makeItemsRotten(loot);
                 dollLootData.setDirty();
 
-                DollDismantlingTileEntity.this.totalItemsInDoll = loot.stream().mapToInt(ItemStack::getCount).sum();
-                itemStack.getOrCreateTag().putLong("amount", DollDismantlingTileEntity.this.totalItemsInDoll);
+                // Update original item count for displaying doll
+                dollTag.putLong(DollDismantlingTileEntity.AMOUNT, DollDismantlingTileEntity.this.totalItemsInDoll);
+            }
 
-                this.extractionHandler = new DollItemExtractor(dollLootData);
-            });
-        }
+            // Update doll loot data for current doll.
+            this.extractionHandler.setDollLootData(dollLootData);
+
+            if (loot.isEmpty())
+            {
+                // Remove vault doll if there are not items in it.
+                DollDismantlingTileEntity.this.removeVaultDoll();
+            }
+        }, this::removeVaultDoll);
+    }
+
+
+    /**
+     * This method removes vault doll from inventory.
+     */
+    public void removeVaultDoll()
+    {
+        this.inventory.setStackInSlot(0, ItemStack.EMPTY);
+        this.extractionHandler.setDollLootData(null);
+        this.totalItemsInDoll = 0;
+
+        this.updateMiniMe();
     }
 
 
@@ -125,256 +152,13 @@ public class DollDismantlingTileEntity extends BlockEntity
      * @param player Player entity.
      * @return {@code true} if player can insert doll, {@code false} otherwise.
      */
-    public boolean playerCannotInsertDoll(ItemStack stack, Player player)
+    public boolean playerCanInsertDoll(ItemStack stack, Player player)
     {
-        return !player.isCreative() &&
-            VaultDollItem.getPlayerGameProfile(stack).
+        return player.isCreative() ||
+            !VaultDollItem.getPlayerGameProfile(stack).
                 flatMap(gp -> Optional.of(gp.getId())).
                 map(uuid -> !uuid.equals(player.getUUID())).
                 orElse(true);
-    }
-
-
-    /**
-     * This method loads table content from NBT data.
-     *
-     * @param tag The NBT data that contains table content.
-     */
-    @Override
-    public void load(@NotNull CompoundTag tag)
-    {
-        super.load(tag);
-
-        if (tag.contains("doll"))
-        {
-            CompoundTag doll = tag.getCompound("doll");
-            this.totalItemsInDoll = doll.getInt("size");
-            this.inventory.deserializeNBT(doll.getCompound("item"));
-
-            if (doll.contains("mini"))
-            {
-                this.miniMeEntity = new DollMiniMeEntity(ModEntities.DOLL_MINI_ME, this.level);
-                this.miniMeEntity.deserializeNBT(doll.getCompound("mini"));
-            }
-            else
-            {
-                this.miniMeEntity = null;
-            }
-        }
-
-        energyStorage.receiveEnergy(tag.getInt("Energy"), false); // Load energy storage from NBT
-    }
-
-
-    /**
-     * This method saves table content into NBT data.
-     *
-     * @param tag The NBT data where table content need to be saved.
-     */
-    @Override
-    protected void saveAdditional(@NotNull CompoundTag tag)
-    {
-        super.saveAdditional(tag);
-
-        CompoundTag doll = new CompoundTag();
-        doll.putInt("size", this.totalItemsInDoll);
-        doll.put("item", this.inventory.serializeNBT());
-
-        if (this.miniMeEntity != null)
-        {
-            doll.put("mini", this.miniMeEntity.serializeNBT());
-        }
-
-        tag.put("doll", doll);
-
-        tag.putInt("Energy", energyStorage.getEnergyStored()); // Save energy storage to NBT
-    }
-
-
-    /**
-     * This method updates NBT tag.
-     *
-     * @return Method that updates NBT tag.
-     */
-    @NotNull
-    @Override
-    public CompoundTag getUpdateTag()
-    {
-        return this.saveWithoutMetadata();
-    }
-
-
-    /**
-     * This method updates table content to client.
-     *
-     * @return Packet that is sent to client
-     */
-    @Nullable
-    @Override
-    public ClientboundBlockEntityDataPacket getUpdatePacket()
-    {
-        return ClientboundBlockEntityDataPacket.create(this);
-    }
-
-
-    @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt)
-    {
-        handleUpdateTag(pkt.getTag());
-    }
-
-
-    @Override
-    public void handleUpdateTag(CompoundTag tag)
-    {
-        if (tag.contains("doll"))
-        {
-            CompoundTag doll = tag.getCompound("doll");
-            this.totalItemsInDoll = doll.getInt("size");
-            this.inventory.deserializeNBT(doll.getCompound("item"));
-
-            if (doll.contains("mini"))
-            {
-                if (this.miniMeEntity == null)
-                {
-                    this.miniMeEntity = new DollMiniMeEntity(ModEntities.DOLL_MINI_ME, this.level);
-                }
-
-                this.miniMeEntity.deserializeNBT(doll.getCompound("mini"));
-            }
-            else
-            {
-                this.miniMeEntity = null;
-            }
-        }
-    }
-
-
-    private void playDollSound(Level level, BlockPos pos)
-    {
-        level.playSound(null,
-            pos,
-            MoreVaultTablesSoundRegistry.BLENDER.get(),
-            SoundSource.BLOCKS,
-            0.3F,
-            1.0F);
-    }
-
-
-    private void autoEjectItems(Level level, BlockPos pos)
-    {
-        BlockPos belowPos = pos.below(); // Get the position below this block
-
-        // Get the BlockEntity below (if any)
-        BlockEntity belowBlockEntity = level.getBlockEntity(belowPos);
-
-        if (belowBlockEntity != null)
-        {
-            // Check if the block below has an IItemHandler capability (i.e., it can accept items)
-            belowBlockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP).
-                ifPresent(belowHandler ->
-                {
-                    // Try to transfer items from this block's inventory to the inventory below
-                    for (int i = 0; i < extractionHandler.getSlots(); i++)
-                    {
-                        ItemStack stackInSlot = extractionHandler.getStackInSlot(i);
-
-                        if (!stackInSlot.isEmpty())
-                        {
-                            // Attempt to move the stack to the below inventory
-                            ItemStack remainingStack = transferStack(belowHandler, stackInSlot);
-
-                            if (remainingStack.isEmpty())
-                            {
-                                ((DollItemExtractor) extractionHandler).dollLootData.getLoot().remove(i);
-                                ((DollItemExtractor) extractionHandler).dollLootData.setDirty();
-                                this.totalItemsInDoll -= stackInSlot.getCount();
-
-                                this.triggerUpdate();
-
-                                break;
-                            }
-                            else if (remainingStack.getCount() != stackInSlot.getCount())
-                            {
-                                ((DollItemExtractor) extractionHandler).dollLootData.getLoot().set(0, remainingStack);
-                                ((DollItemExtractor) extractionHandler).dollLootData.setDirty();
-                                this.totalItemsInDoll =
-                                    this.totalItemsInDoll - stackInSlot.getCount() + remainingStack.getCount();
-
-                                this.triggerUpdate();
-
-                                break;
-                            }
-                        }
-                    }
-                    setChanged(); // Mark the block entity as changed to save its state
-                });
-        }
-    }
-
-
-    private ItemStack transferStack(IItemHandler targetHandler, ItemStack stack)
-    {
-        for (int i = 0; i < targetHandler.getSlots(); i++)
-        {
-            stack = insertStack(targetHandler, stack, i); // Try to insert the stack into the target inventory
-            if (stack.isEmpty())
-            {
-                break; // If the stack is fully inserted, break out of the loop
-            }
-        }
-        return stack; // Return the remaining stack (if any)
-    }
-
-
-    @Override
-    public void setRemoved()
-    {
-        super.setRemoved();
-        LazyOptional.of(() -> this.extractionHandler).invalidate();
-        LazyOptional.of(() -> this.energyStorage).invalidate();
-    }
-
-
-    @Override
-    public void invalidateCaps()
-    {
-        super.invalidateCaps();
-        LazyOptional.of(() -> this.extractionHandler).invalidate();
-        LazyOptional.of(() -> this.energyStorage).invalidate();
-    }
-
-
-    /**
-     * This method returns requested capability for given side direction.
-     *
-     * @param capability The capability to check
-     * @param side The Side to check from,
-     * <strong>CAN BE NULL</strong>. Null is defined to represent 'internal' or 'self'
-     * @param <T> Capability Type.
-     * @return LazyOptional with capability.
-     */
-    @NotNull
-    @Override
-    public <T> LazyOptional<T> getCapability(@NotNull Capability<T> capability, @Nullable Direction side)
-    {
-        if (IntegrationRefinedStorage.shouldPreventImportingCapability(this.getLevel(), this.getBlockPos(), side))
-        {
-            return super.getCapability(capability, side);
-        }
-
-        if (capability == CapabilityEnergy.ENERGY)
-        {
-            return LazyOptional.of(() -> energyStorage).cast();
-        }
-        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
-        {
-            if (side == Direction.DOWN)
-            {
-                return LazyOptional.of(() -> this.extractionHandler).cast();
-            }
-        }
-        return super.getCapability(capability, side);
     }
 
 
@@ -412,44 +196,223 @@ public class DollDismantlingTileEntity extends BlockEntity
     }
 
 
-    // Check if there is enough energy to operate
-    private boolean canOperate()
+// ---------------------------------------------------------------------
+// Section: Data storing and loading
+// ---------------------------------------------------------------------
+
+
+    /**
+     * This method loads table content from NBT data.
+     *
+     * @param tag The NBT data that contains table content.
+     */
+    @Override
+    public void load(@NotNull CompoundTag tag)
     {
-        return energyStorage.getEnergyStored() >= ENERGY_CONSUMPTION;
+        super.load(tag);
+
+        if (tag.contains(DollDismantlingTileEntity.DOLL))
+        {
+            CompoundTag doll = tag.getCompound(DollDismantlingTileEntity.DOLL);
+            this.totalItemsInDoll = doll.getInt(DollDismantlingTileEntity.SIZE);
+            this.inventory.deserializeNBT(doll.getCompound(DollDismantlingTileEntity.ITEM));
+
+            if (doll.contains(DollDismantlingTileEntity.MINI))
+            {
+                // Create new mini-me entity
+                this.miniMeEntity = new DollMiniMeEntity(ModEntities.DOLL_MINI_ME, this.getLevel());
+                this.miniMeEntity.deserializeNBT(doll.getCompound(DollDismantlingTileEntity.MINI));
+            }
+            else
+            {
+                // Remove mini-me entity
+                this.miniMeEntity = null;
+            }
+        }
+
+        // Load energy data from NBT
+        this.energyStorage.receiveEnergy(tag.getInt(DollDismantlingTileEntity.ENERGY), false);
     }
 
 
-    // Method to consume energy from the energy storage
-    private void consumeEnergy(int amount)
+    /**
+     * This method saves table content into NBT data.
+     *
+     * @param tag The NBT data where table content need to be saved.
+     */
+    @Override
+    protected void saveAdditional(@NotNull CompoundTag tag)
     {
-        energyStorage.extractEnergy(amount, false);
+        super.saveAdditional(tag);
+
+        CompoundTag doll = new CompoundTag();
+        doll.putInt(DollDismantlingTileEntity.SIZE, this.totalItemsInDoll);
+        doll.put(DollDismantlingTileEntity.ITEM, this.inventory.serializeNBT());
+
+        if (this.miniMeEntity != null)
+        {
+            doll.put(DollDismantlingTileEntity.MINI, this.miniMeEntity.serializeNBT());
+        }
+
+        tag.put(DollDismantlingTileEntity.DOLL, doll);
+
+        // Put energy storing in tile entity
+        tag.putInt(DollDismantlingTileEntity.ENERGY, this.energyStorage.getEnergyStored());
+    }
+
+
+    /**
+     * This method updates NBT tag.
+     *
+     * @return Method that updates NBT tag.
+     */
+    @NotNull
+    @Override
+    public CompoundTag getUpdateTag()
+    {
+        return this.saveWithoutMetadata();
+    }
+
+
+    /**
+     * This method updates table content to client.
+     *
+     * @return Packet that is sent to client
+     */
+    @Nullable
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket()
+    {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+
+// ---------------------------------------------------------------------
+// Section: Private methods
+// ---------------------------------------------------------------------
+
+
+    /**
+     * This method ejects items from tile entity into block bellow it.
+     */
+    private void autoEjectItems()
+    {
+        BlockPos belowPos = this.getBlockPos().below();
+
+        // Get the BlockEntity below (if any)
+        BlockEntity belowBlockEntity = this.getLevel().getBlockEntity(belowPos);
+
+        if (belowBlockEntity != null)
+        {
+            // Check if the block below has an IItemHandler capability (i.e., it can accept items)
+            belowBlockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP).
+                ifPresent(belowHandler ->
+                {
+                    // Try to transfer items from this block's inventory to the inventory below
+                    for (int slot = 0; slot < this.extractionHandler.getSlots(); slot++)
+                    {
+                        ItemStack stackInSlot = this.extractionHandler.getStackInSlot(slot);
+
+                        if (!stackInSlot.isEmpty())
+                        {
+                            // Attempt to move the stack to the below inventory
+                            ItemStack remainingStack = this.transferStack(belowHandler, stackInSlot);
+
+                            if (this.extractionHandler.transferStack(slot, stackInSlot, remainingStack))
+                            {
+                                // Only move 1 stack per tick.
+                                break;
+                            }
+                        }
+                    }
+
+                    this.setChanged(); // Mark the block entity as changed to save its state
+                });
+        }
+    }
+
+
+    /**
+     * This method tries to transfer stack into target handler.
+     *
+     * @param targetHandler TargetHandler that is receiving item
+     * @param stack The item stack that handler is receiving
+     * @return Remaining item stack that were not inserted.
+     */
+    private ItemStack transferStack(IItemHandler targetHandler, ItemStack stack)
+    {
+        for (int slot = 0; slot < targetHandler.getSlots(); slot++)
+        {
+            ItemStack stackInSlot = targetHandler.getStackInSlot(slot);
+
+            if (targetHandler.insertItem(slot, stack, true).getCount() != stack.getMaxStackSize())
+            {
+                if (stackInSlot.isEmpty())
+                {
+                    targetHandler.insertItem(slot, stack, false);
+                    stack = ItemStack.EMPTY;
+                }
+                else if (ItemHandlerHelper.canItemStacksStack(stackInSlot, stack))
+                {
+                    stack = targetHandler.insertItem(slot, stack, false);
+                }
+            }
+
+            if (stack.isEmpty())
+            {
+                break;
+            }
+        }
+
+        return stack;
+    }
+
+
+    /**
+     * This method checks if energy levels are enough for tile entity to operate.
+     *
+     * @return {@code true} if it has enough energy, {@code false} otherwise
+     */
+    private boolean canOperate()
+    {
+        return this.energyStorage.getEnergyStored() >= this.energyConsumption;
+    }
+
+
+    /**
+     * This method consumes energy for operating
+     */
+    private void consumeEnergy()
+    {
+        this.energyStorage.extractEnergy(this.energyConsumption, false);
     }
 
 
     /**
      * This method sets mini me entity for this tile.
      */
-    public void updateMiniMe()
+    private void updateMiniMe()
     {
-        if (!this.getDoll().is(ModItems.VAULT_DOLL))
+        if (!this.getDoll().is(ModItems.VAULT_DOLL) || this.getLevel() == null)
         {
             this.miniMeEntity = null;
         }
         else
         {
-            this.miniMeEntity = new DollMiniMeEntity(ModEntities.DOLL_MINI_ME,
-                DollDismantlingTileEntity.this.getLevel());
-
+            this.miniMeEntity = new DollMiniMeEntity(ModEntities.DOLL_MINI_ME, this.getLevel());
             CompoundTag dataTag = this.getDoll().getOrCreateTag();
-            VaultDollItem.getPlayerGameProfile(dataTag).
-                ifPresent(this.miniMeEntity::setGameProfile);
+            VaultDollItem.getPlayerGameProfile(dataTag).ifPresent(this.miniMeEntity::setGameProfile);
         }
 
+        // Send update to the client
         this.triggerUpdate();
     }
 
 
-    public void triggerUpdate()
+    /**
+     * This method sends update to client about changes in tile entity.
+     */
+    private void triggerUpdate()
     {
         this.setChanged();
 
@@ -463,30 +426,174 @@ public class DollDismantlingTileEntity extends BlockEntity
     }
 
 
+// ---------------------------------------------------------------------
+// Section: Implementations
+// ---------------------------------------------------------------------
+
+
+    /**
+     * This method manages entity ticking process.
+     */
+    public void tick()
+    {
+        if (this.getLevel() != null && !this.getLevel().isClientSide)
+        {
+            // If doll is present and not air, trigger the sound loop
+            if (!this.getDoll().isEmpty())
+            {
+                // Play sound every 2 seconds if volume is set larger than 0.
+                if (this.volume != 0)
+                {
+                    if (this.soundTickCooldown <= 0)
+                    {
+                        this.getLevel().playSound(null,
+                            this.getBlockPos(),
+                            MoreVaultTablesSoundRegistry.BLENDER.get(),
+                            SoundSource.BLOCKS,
+                            (float) this.volume,
+                            1.0F);
+
+                        this.soundTickCooldown = 19;
+                    }
+                    else
+                    {
+                        this.soundTickCooldown--;
+                    }
+                }
+
+                // Process item ejecting and energy consumption
+                if (this.canOperate())
+                {
+                    this.autoEjectItems();
+                    this.consumeEnergy();
+                }
+            }
+            else
+            {
+                // Reset the cooldown when no doll is present
+                this.soundTickCooldown = 0;
+            }
+        }
+    }
+
+
+    /**
+     * Manages tile entity removing
+     */
+    @Override
+    public void setRemoved()
+    {
+        super.setRemoved();
+        this.energyCapability.invalidate();
+        this.extractionCapability.invalidate();
+    }
+
+
+    /**
+     * Invalidates capabilities for tile entities
+     */
+    @Override
+    public void invalidateCaps()
+    {
+        super.invalidateCaps();
+        this.energyCapability.invalidate();
+        this.extractionCapability.invalidate();
+    }
+
+
+    /**
+     * This method returns requested capability for given side direction.
+     *
+     * @param capability The capability to check
+     * @param side The Side to check from,
+     * <strong>CAN BE NULL</strong>. Null is defined to represent 'internal' or 'self'
+     * @param <T> Capability Type.
+     * @return LazyOptional with capability.
+     */
+    @NotNull
+    @Override
+    public <T> LazyOptional<T> getCapability(@NotNull Capability<T> capability, @Nullable Direction side)
+    {
+        // Use VH method that blocks RS. Just because I do not like RS? Or not... who knows...
+        if (IntegrationRefinedStorage.shouldPreventImportingCapability(this.getLevel(), this.getBlockPos(), side))
+        {
+            return super.getCapability(capability, side);
+        }
+
+        if (capability == CapabilityEnergy.ENERGY)
+        {
+            // Energy capability
+            return this.energyCapability.cast();
+        }
+        else if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
+        {
+            // Item extraction capability
+            return this.extractionCapability.cast();
+        }
+
+        return super.getCapability(capability, side);
+    }
+
+
+// ---------------------------------------------------------------------
+// Section: Private classes
+// ---------------------------------------------------------------------
+
+
+    /**
+     * This class manages item extraction from DollLootData file.
+     */
     private class DollItemExtractor extends ItemStackHandler
     {
-        DollItemExtractor(DollLootData dollLootData)
+        DollItemExtractor()
         {
-            super(dollLootData.getLoot().size());
+            super(0);
+            this.dollLootData = null;
+        }
+
+
+        /**
+         * This method allows to change doll data file for item handler.
+         * @param dollLootData New doll data item.
+         */
+        public void setDollLootData(DollLootData dollLootData)
+        {
             this.dollLootData = dollLootData;
         }
 
 
+        /**
+         * Size of slots depends on loot amount inside doll data file.
+         * @return amount of item stacks in doll loot data file.
+         */
         @Override
         public int getSlots()
         {
-            return this.dollLootData.getLoot().size();
+            return this.dollLootData != null ? this.dollLootData.getLoot().size() : 0;
         }
 
 
+        /**
+         * This method returns item stack in given slot.
+         * @param slot Slot to query
+         * @return ItemStack in given slot inside doll loot data file.
+         */
         @Override
         @NotNull
         public ItemStack getStackInSlot(int slot)
         {
-            return this.dollLootData.getLoot().get(slot);
+            return this.dollLootData != null && this.getSlots() > slot ?
+                this.dollLootData.getLoot().get(slot) : ItemStack.EMPTY;
         }
 
 
+        /**
+         * This method handles item extraction from data file.
+         * @param slot     Slot to extract from.
+         * @param amount   Amount to extract (may be greater than the current stack's max limit)
+         * @param simulate If true, the extraction is only simulated
+         * @return Extracted item stack from data file.
+         */
         @Override
         @NotNull
         public ItemStack extractItem(int slot, int amount, boolean simulate)
@@ -496,13 +603,13 @@ public class DollDismantlingTileEntity extends BlockEntity
                 return ItemStack.EMPTY;
             }
 
-            if (!inventory.getStackInSlot(0).is(ModItems.VAULT_DOLL))
+            if (!DollDismantlingTileEntity.this.getDoll().is(ModItems.VAULT_DOLL))
             {
                 // Not a Vault Doll.
                 return ItemStack.EMPTY;
             }
 
-            if (!(level instanceof ServerLevel))
+            if (!(DollDismantlingTileEntity.this.level instanceof ServerLevel))
             {
                 // Only server side
                 return ItemStack.EMPTY;
@@ -510,6 +617,7 @@ public class DollDismantlingTileEntity extends BlockEntity
 
             if (this.dollLootData == null)
             {
+                // Doll data is not set
                 return ItemStack.EMPTY;
             }
 
@@ -525,6 +633,7 @@ public class DollDismantlingTileEntity extends BlockEntity
 
             if (stackInSlot.isEmpty())
             {
+                // Stack is empty
                 return ItemStack.EMPTY;
             }
 
@@ -546,16 +655,20 @@ public class DollDismantlingTileEntity extends BlockEntity
                 if (stackInSlot.getCount() < amount)
                 {
                     loot.remove(slot);
+                    DollDismantlingTileEntity.this.totalItemsInDoll -= stackInSlot.getCount();
+
                     this.dollLootData.setDirty();
 
                     if (loot.isEmpty())
                     {
-                        // Remove doll item itself.
-                        inventory.setStackInSlot(0, ItemStack.EMPTY);
+                        // Remove doll item itself. It triggers update!
+                        DollDismantlingTileEntity.this.removeVaultDoll();
+                    }
+                    else
+                    {
+                        DollDismantlingTileEntity.this.triggerUpdate();
                     }
 
-                    DollDismantlingTileEntity.this.totalItemsInDoll -= stackInSlot.getCount();
-                    DollDismantlingTileEntity.this.triggerUpdate();
                     return stackInSlot;
                 }
                 else
@@ -564,6 +677,7 @@ public class DollDismantlingTileEntity extends BlockEntity
                     copy.setCount(amount);
 
                     stackInSlot.shrink(amount);
+                    DollDismantlingTileEntity.this.totalItemsInDoll -= amount;
 
                     if (stackInSlot.isEmpty())
                     {
@@ -574,104 +688,131 @@ public class DollDismantlingTileEntity extends BlockEntity
 
                     if (loot.isEmpty())
                     {
-                        // Remove doll item itself.
-                        inventory.setStackInSlot(0, ItemStack.EMPTY);
+                        // Remove doll item itself. It triggers update!
+                        DollDismantlingTileEntity.this.removeVaultDoll();
+                    }
+                    else
+                    {
+                        DollDismantlingTileEntity.this.triggerUpdate();
                     }
 
-                    DollDismantlingTileEntity.this.totalItemsInDoll -= amount;
-                    DollDismantlingTileEntity.this.triggerUpdate();
                     return copy;
                 }
             }
         }
 
 
-        protected final DollLootData dollLootData;
-    }
-
-
-    public static void tick(Level level, BlockPos pos, BlockState blockState, DollDismantlingTileEntity tileEntity)
-    {
-        if (!level.isClientSide)
+        /**
+         * This method handles item transfer from current handler.
+         * @param slot The slot from which item is transferred.
+         * @param stackInSlot The stack in slot that is transferred.
+         * @param remainingStack The remaining stack that should be kept inside inventory.
+         * @return {@code true} if transfer happened, {@code false} otherwise.
+         */
+        public boolean transferStack(int slot, ItemStack stackInSlot, ItemStack remainingStack)
         {
-            // If doll is present and not air, trigger the sound loop
-            if (!tileEntity.getDoll().isEmpty())
+            if (this.dollLootData == null || this.getSlots() <= slot)
             {
-                // Play sound every 2 seconds
-                if (tileEntity.soundTickCooldown <= 0)
+                return false;
+            }
+
+            if (remainingStack.isEmpty())
+            {
+                this.dollLootData.getLoot().remove(slot);
+                DollDismantlingTileEntity.this.totalItemsInDoll -= stackInSlot.getCount();
+
+                this.dollLootData.setDirty();
+
+                if (this.dollLootData.getLoot().isEmpty())
                 {
-                    tileEntity.playDollSound(level, pos);
-                    tileEntity.soundTickCooldown = 40;
+                    // Remove doll item itself.
+                    DollDismantlingTileEntity.this.removeVaultDoll();
                 }
                 else
                 {
-                    tileEntity.soundTickCooldown--;
+                    DollDismantlingTileEntity.this.triggerUpdate();
                 }
 
-                if (tileEntity.canOperate())
-                {
-                    tileEntity.autoEjectItems(level, pos);
-                    tileEntity.consumeEnergy(ENERGY_CONSUMPTION);
-                }
+                return true;
+            }
+            else if (remainingStack.getCount() != stackInSlot.getCount())
+            {
+                this.dollLootData.getLoot().set(slot, remainingStack);
+                this.dollLootData.setDirty();
+
+                DollDismantlingTileEntity.this.totalItemsInDoll -= (stackInSlot.getCount() - remainingStack.getCount());
+
+                DollDismantlingTileEntity.this.triggerUpdate();
+
+                return true;
             }
             else
-            {
-                // Reset the cooldown when no doll is present
-                tileEntity.soundTickCooldown = 0;
-            }
-        }
-    }
-
-
-    private static boolean isEmpty(IItemHandler itemHandler)
-    {
-        for (int slot = 0; slot < itemHandler.getSlots(); ++slot)
-        {
-            ItemStack stackInSlot = itemHandler.getStackInSlot(slot);
-            if (stackInSlot.getCount() > 0)
             {
                 return false;
             }
         }
 
-        return true;
+
+        /**
+         * This variable stores vault doll data that is handled by current extractor.
+         */
+        protected DollLootData dollLootData;
     }
 
 
-    private static ItemStack insertStack(IItemHandler destInventory, ItemStack stack, int slot)
-    {
-        ItemStack itemstack = destInventory.getStackInSlot(slot);
-        if (destInventory.insertItem(slot, stack, true).getCount() != 64)
-        {
-            boolean insertedItem = false;
-            boolean inventoryWasEmpty = isEmpty(destInventory);
+// ---------------------------------------------------------------------
+// Section: Variables
+// ---------------------------------------------------------------------
 
-            if (itemstack.isEmpty())
-            {
-                destInventory.insertItem(slot, stack, false);
-                stack = ItemStack.EMPTY;
-                insertedItem = true;
-            }
-            else if (ItemHandlerHelper.canItemStacksStack(itemstack, stack))
-            {
-                int originalSize = stack.getCount();
-                stack = destInventory.insertItem(slot, stack, false);
-                boolean var10000 = originalSize < stack.getCount();
-            }
-        }
 
-        return stack;
-    }
+    /**
+     * This variable stores extraction handler that manages item extraction from vault doll data
+     */
+    private final DollItemExtractor extractionHandler;
 
-    private final EnergyStorage energyStorage = new EnergyStorage(MAX_ENERGY, 100, 100);
+    /**
+     * This optional stores extraction capability object.
+     */
+    private final LazyOptional<IItemHandler> extractionCapability;
 
+    /**
+     * This variable stores energy storage for current object.
+     */
+    private final EnergyStorage energyStorage;
+
+    /**
+     * This optional stores energy capability object.
+     */
+    private final LazyOptional<EnergyStorage> energyCapability;
+
+    /**
+     * This variable stores how much energy is consumed by current tile entity.
+     */
+    private final int energyConsumption;
+
+    /**
+     * This variable stores the volume of tile entity.
+     */
+    private final double volume;
+
+    /**
+     * This variable stores cooldown before next sound should be played.
+     */
     private int soundTickCooldown = 0;
 
     /**
      * This variable stores how many items are in the doll currently.
      */
-    private int totalItemsInDoll = 0;    /**
-     * This variable stores output inventory that contains all card items  that are identified.
+    private int totalItemsInDoll = 0;
+
+    /**
+     * The entity that is displayed in the dismantler.
+     */
+    @Nullable
+    private DollMiniMeEntity miniMeEntity;
+
+    /**
+     * This variable stores output inventory that contains doll item
      */
     private final ItemStackHandler inventory = new ItemStackHandler(1)
     {
@@ -683,17 +824,43 @@ public class DollDismantlingTileEntity extends BlockEntity
         }
     };
 
+
+// ---------------------------------------------------------------------
+// Section: Constants
+// ---------------------------------------------------------------------
+
     /**
-     * The entity that is displayed in the dismantler.
+     * The parameter for data storage.
      */
-    @Nullable
-    private DollMiniMeEntity miniMeEntity;
+    private static final String AMOUNT = "amount";
 
-    private IItemHandler extractionHandler;
+    /**
+     * The parameter for data storage.
+     */
+    private static final String DOLL = "doll";
 
-    private static final int MAX_ENERGY = 1000; // Maximum energy the block can store
+    /**
+     * The parameter for data storage.
+     */
+    private static final String SIZE = "size";
 
-    private static final int ENERGY_CONSUMPTION = 16; // Energy consumed per operation
+    /**
+     * The parameter for data storage.
+     */
+    private static final String ITEM = "item";
 
+    /**
+     * The parameter for data storage.
+     */
+    private static final String MINI = "mini";
 
+    /**
+     * The parameter for data storage.
+     */
+    private static final String REWARD = "reward";
+
+    /**
+     * The parameter for data storage.
+     */
+    private static final String ENERGY = "energy";
 }
