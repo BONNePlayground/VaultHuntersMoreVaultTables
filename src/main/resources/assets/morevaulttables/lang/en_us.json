@@ -1,10 +1,10 @@
 {
   "block.morevaulttables.card_pack_opener_block": "Card Pack Table Block",
   "block.morevaulttables.jewel_sack_opener_block": "Jewel Sack Table Block",
-  "block.morevaulttables.doll_dismantling_block": "Doll Juicer Block",
+  "block.morevaulttables.doll_dismantling_block": "Doll Mixer Block",
   "container.morevaulttables.card_pack_opener_tile_entity": "Card Pack Opener Table",
   "container.morevaulttables.jewel_sack_opener_tile_entity": "Jewel Sack Opener Table",
-  "container.morevaulttables.doll_dismantling_tile_entity": "Doll Juicer Table",
+  "container.morevaulttables.doll_dismantling_tile_entity": "Doll Mixer",
 
   "itemGroup.moretables": "More Vault Hunter Tables"
 }
