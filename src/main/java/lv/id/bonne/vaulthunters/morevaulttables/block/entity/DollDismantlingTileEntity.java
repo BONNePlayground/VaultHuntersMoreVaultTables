@@ -373,7 +373,7 @@ public class DollDismantlingTileEntity extends BlockEntity
      *
      * @return {@code true} if it has enough energy, {@code false} otherwise
      */
-    private boolean canOperate()
+    public boolean canOperate()
     {
         return this.energyStorage.getEnergyStored() >= this.energyConsumption;
     }
@@ -441,29 +441,29 @@ public class DollDismantlingTileEntity extends BlockEntity
             // If doll is present and not air, trigger the sound loop
             if (!this.getDoll().isEmpty())
             {
-                // Play sound every 2 seconds if volume is set larger than 0.
-                if (this.volume != 0)
-                {
-                    if (this.soundTickCooldown <= 0)
-                    {
-                        this.getLevel().playSound(null,
-                            this.getBlockPos(),
-                            MoreVaultTablesSoundRegistry.BLENDER.get(),
-                            SoundSource.BLOCKS,
-                            (float) this.volume,
-                            1.0F);
-
-                        this.soundTickCooldown = 19;
-                    }
-                    else
-                    {
-                        this.soundTickCooldown--;
-                    }
-                }
-
                 // Process item ejecting and energy consumption
                 if (this.canOperate())
                 {
+                    // Play sound every 2 seconds if volume is set larger than 0.
+                    if (this.volume != 0)
+                    {
+                        if (this.soundTickCooldown <= 0)
+                        {
+                            this.getLevel().playSound(null,
+                                this.getBlockPos(),
+                                MoreVaultTablesSoundRegistry.BLENDER.get(),
+                                SoundSource.BLOCKS,
+                                (float) this.volume,
+                                1.0F);
+
+                            this.soundTickCooldown = 19;
+                        }
+                        else
+                        {
+                            this.soundTickCooldown--;
+                        }
+                    }
+
                     this.autoEjectItems();
                     this.consumeEnergy();
                 }

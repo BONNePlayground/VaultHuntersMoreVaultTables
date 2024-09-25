@@ -7,6 +7,8 @@ import org.jetbrains.annotations.NotNull;
 
 import iskallia.vault.entity.entity.DollMiniMeEntity;
 import lv.id.bonne.vaulthunters.morevaulttables.MoreVaultTablesMod;
+import lv.id.bonne.vaulthunters.morevaulttables.block.CardSelectorTableBlock;
+import lv.id.bonne.vaulthunters.morevaulttables.block.DollDismantlingBlock;
 import lv.id.bonne.vaulthunters.morevaulttables.block.entity.DollDismantlingTileEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -58,10 +60,19 @@ public class DollDismantlingRenderer implements BlockEntityRenderer<DollDismantl
         poseStack.translate(0.5, y, 0.5);
         poseStack.scale(0.6f, 0.6f, 0.6f);
 
-        long gameTime = tileEntity.getLevel().getGameTime();
-        float rotationAngle = (gameTime % 360L) * (float) MoreVaultTablesMod.CONFIGURATION.getDollDismantlerRotationSpeed();
+        if (tileEntity.canOperate())
+        {
+            long gameTime = tileEntity.getLevel().getGameTime();
+            float rotationAngle =
+                (gameTime % 360L) * (float) MoreVaultTablesMod.CONFIGURATION.getDollDismantlerRotationSpeed();
 
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(rotationAngle));
+            poseStack.mulPose(Vector3f.YP.rotationDegrees(rotationAngle));
+        }
+        else
+        {
+            poseStack.mulPose(Vector3f.YP.rotationDegrees(
+                tileEntity.getBlockState().getValue(DollDismantlingBlock.FACING).toYRot()));
+        }
 
         // Use the player renderer to render the player
         Minecraft.getInstance().getEntityRenderDispatcher().
