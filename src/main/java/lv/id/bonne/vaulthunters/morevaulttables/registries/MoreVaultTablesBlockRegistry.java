@@ -94,7 +94,7 @@ public class MoreVaultTablesBlockRegistry
     public static final RegistryObject<Block> JEWEL_SELECTOR_TABLE_BLOCK = registerBlock("jewel_sack_opener_block",
         () -> new JewelSelectorTableBlock(
             BlockBehaviour.Properties.copy(Blocks.STONECUTTER).
-                strength(4f).
+                strength(0.3f).
                 sound(SoundType.CALCITE).
                 noOcclusion().
                 requiresCorrectToolForDrops(),
@@ -108,7 +108,7 @@ public class MoreVaultTablesBlockRegistry
     public static final RegistryObject<Block> CARD_SELECTOR_TABLE_BLOCK = registerBlock("card_pack_opener_block",
         () -> new CardSelectorTableBlock(
             BlockBehaviour.Properties.copy(Blocks.STONECUTTER).
-                strength(4f).
+                strength(0.3f).
                 sound(SoundType.CALCITE).
                 noOcclusion().
                 requiresCorrectToolForDrops(),
@@ -122,7 +122,7 @@ public class MoreVaultTablesBlockRegistry
     public static final RegistryObject<Block> DOLL_DISMANTLING_BLOCK = registerBlock("doll_dismantling_block",
         () -> new DollDismantlingBlock(
             BlockBehaviour.Properties.copy(Blocks.GRASS_BLOCK).
-                strength(4f).
+                strength(0.3f).
                 sound(SoundType.METAL).
                 noOcclusion().
                 requiresCorrectToolForDrops(),
