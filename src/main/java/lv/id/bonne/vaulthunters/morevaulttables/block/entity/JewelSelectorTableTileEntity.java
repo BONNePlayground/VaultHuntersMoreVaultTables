@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import iskallia.vault.block.entity.base.FilteredInputInventoryTileEntity;
+import iskallia.vault.container.oversized.OverSizedInvWrapper;
 import iskallia.vault.container.oversized.OverSizedInventory;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.integration.IntegrationRefinedStorage;
@@ -289,7 +290,6 @@ public class JewelSelectorTableTileEntity extends BlockEntity implements MenuPro
      * @param itemStack Inserted item stack
      * @return {@code true} if item can be inserted, {@code false} otherwise
      */
-    @Override
     public boolean canInsertItem(int slot, @NotNull ItemStack itemStack)
     {
         // The item will should not be placed in first slot.
@@ -311,77 +311,6 @@ public class JewelSelectorTableTileEntity extends BlockEntity implements MenuPro
 
 
     /**
-     * This method returns input filter compatibility.
-     * @param inventory The targeted inventory.
-     * @param side The input side.
-     * @return LazyOptional with capability inside it.
-     * @param <T> Capability type.
-     */
-    @Override
-    public <T> LazyOptional<T> getFilteredInputCapability(@NotNull Container inventory, @Nullable Direction side)
-    {
-        return !this.isInventorySideAccessible(side) ? LazyOptional.empty() :
-            LazyOptional.of(() -> new FilteredInvWrapper(this, inventory)
-            {
-                @NotNull
-                @Override
-                public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate)
-                {
-                    if (!canInsertItem(slot, stack))
-                    {
-                        // Cannot insert.
-                        return stack;
-                    }
-                    else if (slot == 0)
-                    {
-                        // Custom slot 0 processor
-                        if (this.getStackInSlot(0).isEmpty())
-                        {
-                            if (stack.getCount() > 1)
-                            {
-                                stack = stack.copy();
-
-                                if (!simulate)
-                                {
-                                    this.getInv().setItem(slot, stack.split(1));
-                                    this.getInv().setChanged();
-                                }
-                                else
-                                {
-                                    stack.shrink(Math.min(stack.getCount(), 1));
-                                }
-
-                                return stack;
-                            }
-                            else
-                            {
-                                if (!simulate)
-                                {
-                                    ItemStack copy = stack.copy();
-                                    this.getInv().setItem(slot, copy);
-                                    this.getInv().setChanged();
-                                }
-
-                                return ItemStack.EMPTY;
-                            }
-                        }
-                        else
-                        {
-                            // Cannot insert item into non-empty slot
-                            return stack;
-                        }
-                    }
-                    else
-                    {
-                        // Default processing.
-                        return super.insertItem(slot, stack, simulate);
-                    }
-                }
-            }).cast();
-    }
-
-
-    /**
      * This method returns output filter compatibility.
      * @param inventory The targeted inventory.
      * @param side The output side.
@@ -392,7 +321,7 @@ public class JewelSelectorTableTileEntity extends BlockEntity implements MenuPro
     {
         // Only down direction currently
         return side != Direction.DOWN ? LazyOptional.empty() :
-            LazyOptional.of(() -> new FilteredInvWrapper(this, inventory)
+            LazyOptional.of(() -> new OverSizedInvWrapper(inventory)
             {
                 /**
                  * This method use default extraction method.
@@ -468,7 +397,7 @@ public class JewelSelectorTableTileEntity extends BlockEntity implements MenuPro
         else
         {
             return cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ?
-                this.getFilteredInputCapability(this.inputInventory, side) :
+                this.getFilteredInputCapability(side, new Container[]{this.inputInventory}) :
                 super.getCapability(cap, side);
         }
     }
@@ -502,7 +431,7 @@ public class JewelSelectorTableTileEntity extends BlockEntity implements MenuPro
     /**
      * This variable stores pouches inventory.
      */
-    private final OverSizedInventory inputInventory = new OverSizedInventory(61, this)
+    private final OverSizedInventory inputInventory = new OverSizedInventory.FilteredInsert(61, this, this::canInsertItem)
     {
         /**
          * This method updates how many jewel pouches are in the system

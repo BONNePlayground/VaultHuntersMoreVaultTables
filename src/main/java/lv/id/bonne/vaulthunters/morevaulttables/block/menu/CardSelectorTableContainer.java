@@ -99,16 +99,16 @@ public class CardSelectorTableContainer extends OverSizedSlotContainer implement
             {
                 super.setChanged();
 
-                if (CardSelectorTableContainer.this.player instanceof LocalPlayer)
+                if (CardSelectorTableContainer.this.player instanceof ServerPlayer serverPlayer)
+                {
+                    CardSelectorTableContainer.this.identifySelectedItem(serverPlayer);
+                }
+                else if (CardSelectorTableContainer.this.player instanceof LocalPlayer)
                 {
                     if (Minecraft.getInstance().screen instanceof CardSelectorTableScreen screen)
                     {
                         screen.setRegenerate();
                     }
-                }
-                else if (CardSelectorTableContainer.this.player instanceof ServerPlayer serverPlayer)
-                {
-                    CardSelectorTableContainer.this.identifySelectedItem(serverPlayer);
                 }
             }
         });

@@ -107,16 +107,16 @@ public class JewelSelectorTableContainer extends OverSizedSlotContainer implemen
             {
                 super.setChanged();
 
-                if (JewelSelectorTableContainer.this.player instanceof LocalPlayer)
+                if (JewelSelectorTableContainer.this.player instanceof ServerPlayer serverPlayer)
+                {
+                    JewelSelectorTableContainer.this.identifySelectedItem(serverPlayer);
+                }
+                else if (JewelSelectorTableContainer.this.player instanceof LocalPlayer)
                 {
                     if (Minecraft.getInstance().screen instanceof JewelSelectorTableScreen screen)
                     {
                         screen.setRegenerate();
                     }
-                }
-                else if (JewelSelectorTableContainer.this.player instanceof ServerPlayer serverPlayer)
-                {
-                    JewelSelectorTableContainer.this.identifySelectedItem(serverPlayer);
                 }
             }
         });
