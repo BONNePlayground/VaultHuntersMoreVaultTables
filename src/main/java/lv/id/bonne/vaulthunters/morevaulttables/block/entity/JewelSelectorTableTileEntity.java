@@ -497,14 +497,10 @@ public class JewelSelectorTableTileEntity extends BlockEntity implements MenuPro
                 if (jewels.isEmpty())
                 {
                     this.identifySelectedItem(null);
-                    jewels = JewelPouchItem.getJewels(this.getSelectedPouch());
+                    JewelPouchItem.getJewels(this.getSelectedPouch());
                 }
 
-                List<ItemStack> itemStacks = jewels.stream().map(roll -> roll.stack().copy()).toList();
-                Optional<ItemStack> optional = GearScoreHelper.pickHighestWeight(itemStacks);
-
-                int selectedSlot = optional.map(itemStacks::indexOf).orElse(jewels.size() - 1);
-                this.craftAndMoveItem(selectedSlot, null);
+                this.craftAndMoveItem(0, null);
 
                 this.consumeEnergy();
 
@@ -583,7 +579,7 @@ public class JewelSelectorTableTileEntity extends BlockEntity implements MenuPro
             return false;
         }
 
-        if (this.getTotalSizeInJewels() < 60)
+        if (this.getTotalSizeInJewels() < 59)
         {
             boolean moved = false;
 
@@ -619,7 +615,7 @@ public class JewelSelectorTableTileEntity extends BlockEntity implements MenuPro
                     }
 
                     outputInventory.setItem(i, result);
-                    moved = true;
+                    moved = jewels.size() == 1 || slotIndex++ == 1;
                 }
             }
 

@@ -162,13 +162,13 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
             // Get rolled jewels
             this.collectJewels();
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 1; i++)
             {
                 final int finalI = i;
 
                 SelectableFakeItemSlotElement<?> slot = new SelectableFakeItemSlotElement<>(Spatials.positionXY(
                     121,
-                    9 + 18 * (i + 1)),
+                    9 + 18 * (i + 2)),
                     () -> this.rolledJewelList.size() > finalI ? this.rolledJewelList.get(finalI).stack() : ItemStack.EMPTY,
                     () -> this.menu.getTileEntity().getSelectedPouch().isEmpty() ||
                         this.rolledJewelList.size() <= finalI ||
@@ -184,14 +184,14 @@ public class JewelSelectorTableScreen extends AbstractElementContainerScreen<Jew
             SelectableFakeItemSlotElement<?> slot = new SelectableFakeItemSlotElement<>(Spatials.positionXY(
                 139,
                 9 + 18 * 2),
-                () -> this.rolledJewelList.size() > 3 ? this.rolledJewelList.get(3).stack() : ItemStack.EMPTY,
+                () -> this.rolledJewelList.size() > 1 ? this.rolledJewelList.get(1).stack() : ItemStack.EMPTY,
                 () -> this.menu.getTileEntity().getSelectedPouch().isEmpty() ||
-                    this.rolledJewelList.size() <= 3 ||
+                    this.rolledJewelList.size() <= 1 ||
                     this.getMenu().getTileEntity().getTotalSizeInJewels() >= 60).
                 setLabelStackCount().
                 layout((screen, gui, parent, world) -> world.translateXY(gui));
 
-            slot.whenClicked(new MouseClickRunnable(3, ScrollMenu.RESULT));
+            slot.whenClicked(new MouseClickRunnable(1, ScrollMenu.RESULT));
             this.addElement(slot);
             this.elementList.add(slot);
         }

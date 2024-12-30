@@ -272,7 +272,7 @@ public class JewelSelectorTableContainer extends OverSizedSlotContainer implemen
     @Override
     public boolean craftAndMoveItem(int slotIndex, ServerPlayer serverPlayer)
     {
-        return this.getTileEntity().craftAndMoveItem(slotIndex, serverPlayer);
+        return this.getTileEntity().craftAndMoveItem(0, serverPlayer);
     }
 
 
