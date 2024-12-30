@@ -3,7 +3,6 @@ package lv.id.bonne.vaulthunters.morevaulttables.block;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.Objects;
 
 import lv.id.bonne.vaulthunters.morevaulttables.block.entity.CardSelectorTableTileEntity;
@@ -22,6 +21,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.pathfinder.PathComputationType;
@@ -39,7 +40,8 @@ public class CardSelectorTableBlock extends HorizontalDirectionalBlock implement
     /**
      * Instantiates a new Card selector table block.
      */
-    public CardSelectorTableBlock(Properties properties, VoxelShape shape) {
+    public CardSelectorTableBlock(Properties properties, VoxelShape shape)
+    {
         super(properties);
         this.registerDefaultState(this.getStateDefinition().any().
             setValue(FACING, Direction.NORTH));
@@ -49,6 +51,7 @@ public class CardSelectorTableBlock extends HorizontalDirectionalBlock implement
 
     /**
      * Create block state definition
+     *
      * @param builder The definition builder.
      */
     @Override
@@ -60,6 +63,7 @@ public class CardSelectorTableBlock extends HorizontalDirectionalBlock implement
 
     /**
      * This method allows to rotate block opposite to player.
+     *
      * @param context The placement context.
      * @return The new block state.
      */
@@ -73,6 +77,7 @@ public class CardSelectorTableBlock extends HorizontalDirectionalBlock implement
 
     /**
      * This method returns the shape of current table.
+     *
      * @param state The block state.
      * @param level The level where block is located.
      * @param pos The position of the block.
@@ -92,6 +97,7 @@ public class CardSelectorTableBlock extends HorizontalDirectionalBlock implement
 
     /**
      * The interaction that happens when player click on block.
+     *
      * @param state The block state.
      * @param level The level where block is located.
      * @param pos The position of the block.
@@ -119,7 +125,9 @@ public class CardSelectorTableBlock extends HorizontalDirectionalBlock implement
 
             if (tile instanceof CardSelectorTableTileEntity vaultCardApplicationStationTile)
             {
-                NetworkHooks.openGui(serverPlayer, vaultCardApplicationStationTile, buffer -> buffer.writeBlockPos(pos));
+                NetworkHooks.openGui(serverPlayer,
+                    vaultCardApplicationStationTile,
+                    buffer -> buffer.writeBlockPos(pos));
                 return InteractionResult.SUCCESS;
             }
             else
@@ -136,6 +144,7 @@ public class CardSelectorTableBlock extends HorizontalDirectionalBlock implement
 
     /**
      * This method indicates if entities can path find over this block.
+     *
      * @param state The block state.
      * @param level Level where block is located.
      * @param pos Position of the block.
@@ -151,6 +160,7 @@ public class CardSelectorTableBlock extends HorizontalDirectionalBlock implement
 
     /**
      * This method drops all items from container when block is broken.
+     *
      * @param state The BlockState.
      * @param level Level where block is broken.
      * @param pos Position of broken block.
@@ -158,7 +168,11 @@ public class CardSelectorTableBlock extends HorizontalDirectionalBlock implement
      * @param isMoving Boolean if block is moving.
      */
     @Override
-    public void onRemove(BlockState state, @NotNull Level level, @NotNull BlockPos pos, BlockState newState, boolean isMoving)
+    public void onRemove(BlockState state,
+        @NotNull Level level,
+        @NotNull BlockPos pos,
+        BlockState newState,
+        boolean isMoving)
     {
         if (!state.is(newState.getBlock()))
         {
@@ -203,6 +217,7 @@ public class CardSelectorTableBlock extends HorizontalDirectionalBlock implement
 
     /**
      * This method creates a new block entity.
+     *
      * @param pos Position for block.
      * @param state Block state.
      * @return New block entity.
@@ -213,6 +228,53 @@ public class CardSelectorTableBlock extends HorizontalDirectionalBlock implement
         return MoreVaultTablesReferences.CARD_SELECTOR_TABLE_TILE_ENTITY.create(pos, state);
     }
 
+
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level level,
+        @NotNull BlockState state,
+        @NotNull BlockEntityType<T> type)
+    {
+        return createTickerHelper(type,
+            MoreVaultTablesReferences.CARD_SELECTOR_TABLE_TILE_ENTITY,
+            (world, pos, blockState, tileEntity) -> tileEntity.tick());
+    }
+
+
+    @Override
+    public boolean canConnectRedstone(BlockState state, BlockGetter level, BlockPos pos, @Nullable Direction direction)
+    {
+        return true;
+    }
+
+
+    @Override
+    public void neighborChanged(@NotNull BlockState state,
+        @NotNull Level level,
+        @NotNull BlockPos pos,
+        @NotNull Block block,
+        @NotNull BlockPos fromPos,
+        boolean moving)
+    {
+        super.neighborChanged(state, level, pos, block, fromPos, moving);
+
+        if (level.getBlockEntity(pos) instanceof CardSelectorTableTileEntity tileEntity)
+        {
+            tileEntity.setRedstonePowered(level.hasNeighborSignal(pos));
+        }
+    }
+
+
+    /**
+     * This method creates requested tick block.
+     */
+    @Nullable
+    public static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(
+        BlockEntityType<A> type,
+        BlockEntityType<E> expectedType,
+        BlockEntityTicker<? super E> ticker)
+    {
+        return type == expectedType ? (BlockEntityTicker<A>) ticker : null;
+    }
 
     /**
      * The constant SHAPE.

@@ -22,6 +22,8 @@ public class Configuration
     {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 
+        builder.push("Doll Section");
+
         this.blockVaultDolls = builder.
             comment("This option allows to toggle if Vault Dolls should be able to place in the world.",
                 "By default: false - does not blocks vault doll placement").
@@ -57,6 +59,54 @@ public class Configuration
             comment("This option allows to change the rotation speed for Doll inside Dismantler.",
                 "By default: 25").
             defineInRange("doll-dismantler-rotation-speed", 25d, 0, 2000);
+
+        builder.pop();
+        builder.push("Card Opener Section");
+
+        this.cardOpenerSpeed = builder.
+            comment("This option allows to set cooldown (in ticks) before Card Opener opens cards automatically.",
+                "By default: 20").
+            defineInRange("card-opener-tick-cooldown", 20, 0, Integer.MAX_VALUE);
+
+        this.cardOpenerEnergyStorage = builder.
+            comment("This option allows to change the amount of energy that Card Opener stores inside block.",
+                "By default: 1000").
+            defineInRange("card-opener-energy-storage", 1000, 0, Integer.MAX_VALUE);
+
+        this.cardOpenerEnergyConsumption = builder.
+            comment("This option allows to change the amount of energy that Card Opener uses per tick.",
+                "By default: 16").
+            defineInRange("card-opener-energy-consumption", 16, 0, Integer.MAX_VALUE);
+
+        this.cardOpenerEnergyTransfer = builder.
+            comment("This option allows to change the amount of energy that Card Opener can receive/extract.",
+                "By default: 100").
+            defineInRange("card-opener-energy-transfer", 100, 0, Integer.MAX_VALUE);
+
+        builder.pop();
+        builder.push("Card Opener Section");
+
+        this.pouchOpenerSpeed = builder.
+            comment("This option allows to set cooldown (in ticks) before Jewel Pouch Opener opens cards automatically.",
+                "By default: 20").
+            defineInRange("jewel-pouch-opener-tick-cooldown", 20, 0, Integer.MAX_VALUE);
+
+        this.pouchOpenerEnergyStorage = builder.
+            comment("This option allows to change the amount of energy that Jewel Pouch Opener stores inside block.",
+                "By default: 1000").
+            defineInRange("jewel-pouch-opener-energy-storage", 1000, 0, Integer.MAX_VALUE);
+
+        this.pouchOpenerEnergyConsumption = builder.
+            comment("This option allows to change the amount of energy that Jewel Pouch Opener uses per tick.",
+                "By default: 16").
+            defineInRange("jewel-pouch-opener-energy-consumption", 16, 0, Integer.MAX_VALUE);
+
+        this.pouchOpenerEnergyTransfer = builder.
+            comment("This option allows to change the amount of energy that Jewel Pouch Opener can receive/extract.",
+                "By default: 100").
+            defineInRange("jewel-pouch-opener-energy-transfer", 100, 0, Integer.MAX_VALUE);
+
+        builder.pop();
 
         Configuration.GENERAL_SPEC = builder.build();
     }
@@ -139,6 +189,94 @@ public class Configuration
     }
 
 
+    /**
+     * Gets card opener energy storage.
+     *
+     * @return the card opener energy storage
+     */
+    public int getCardOpenerEnergyStorage()
+    {
+        return this.cardOpenerEnergyStorage.get();
+    }
+
+
+    /**
+     * Gets card opener energy consumption.
+     *
+     * @return the card opener energy consumption
+     */
+    public int getCardOpenerEnergyConsumption()
+    {
+        return this.cardOpenerEnergyConsumption.get();
+    }
+
+
+    /**
+     * Gets card opener energy transfer.
+     *
+     * @return the card opener energy transfer
+     */
+    public int getCardOpenerEnergyTransfer()
+    {
+        return this.cardOpenerEnergyTransfer.get();
+    }
+
+
+    /**
+     * Gets pouch opener energy storage.
+     *
+     * @return the pouch opener energy storage
+     */
+    public int getPouchOpenerEnergyStorage()
+    {
+        return this.pouchOpenerEnergyStorage.get();
+    }
+
+
+    /**
+     * Gets pouch opener energy consumption.
+     *
+     * @return the pouch opener energy consumption
+     */
+    public int getPouchOpenerEnergyConsumption()
+    {
+        return this.pouchOpenerEnergyConsumption.get();
+    }
+
+
+    /**
+     * Gets pouch opener energy transfer.
+     *
+     * @return the pouch opener energy transfer
+     */
+    public int getPouchOpenerEnergyTransfer()
+    {
+        return this.pouchOpenerEnergyTransfer.get();
+    }
+
+
+    /**
+     * Gets card opener speed.
+     *
+     * @return the card opener speed
+     */
+    public int getCardOpenerSpeed()
+    {
+        return this.cardOpenerSpeed.get();
+    }
+
+
+    /**
+     * Gets pouch opener speed.
+     *
+     * @return the pouch opener speed
+     */
+    public int getPouchOpenerSpeed()
+    {
+        return this.pouchOpenerSpeed.get();
+    }
+
+
     // ---------------------------------------------------------------------
     // Section: Variables
     // ---------------------------------------------------------------------
@@ -178,6 +316,46 @@ public class Configuration
      * Stores config variable value.
      */
     private final ForgeConfigSpec.IntValue dollDismantlerExtractionSpeed;
+
+    /**
+     * Stores config variable value.
+     */
+    private final ForgeConfigSpec.IntValue cardOpenerSpeed;
+
+    /**
+     * Stores config variable value.
+     */
+    private final ForgeConfigSpec.IntValue cardOpenerEnergyStorage;
+
+    /**
+     * Stores config variable value.
+     */
+    private final ForgeConfigSpec.IntValue cardOpenerEnergyConsumption;
+
+    /**
+     * Stores config variable value.
+     */
+    private final ForgeConfigSpec.IntValue cardOpenerEnergyTransfer;
+
+    /**
+     * Stores config variable value.
+     */
+    private final ForgeConfigSpec.IntValue pouchOpenerSpeed;
+
+    /**
+     * Stores config variable value.
+     */
+    private final ForgeConfigSpec.IntValue pouchOpenerEnergyStorage;
+
+    /**
+     * Stores config variable value.
+     */
+    private final ForgeConfigSpec.IntValue pouchOpenerEnergyConsumption;
+
+    /**
+     * Stores config variable value.
+     */
+    private final ForgeConfigSpec.IntValue pouchOpenerEnergyTransfer;
 
     /**
      * The general config spec.

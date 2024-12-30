@@ -3,7 +3,6 @@ package lv.id.bonne.vaulthunters.morevaulttables.block;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.Objects;
 
 import lv.id.bonne.vaulthunters.morevaulttables.block.entity.JewelSelectorTableTileEntity;
@@ -14,7 +13,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -22,6 +23,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.pathfinder.PathComputationType;
@@ -38,8 +41,12 @@ public class JewelSelectorTableBlock extends HorizontalDirectionalBlock implemen
 {
     /**
      * Instantiates a new Jewel selector table block.
+     *
+     * @param properties the properties
+     * @param shape the shape
      */
-    public JewelSelectorTableBlock(Properties properties, VoxelShape shape) {
+    public JewelSelectorTableBlock(Properties properties, VoxelShape shape)
+    {
         super(properties);
         this.registerDefaultState(this.getStateDefinition().any().
             setValue(FACING, Direction.NORTH));
@@ -49,6 +56,7 @@ public class JewelSelectorTableBlock extends HorizontalDirectionalBlock implemen
 
     /**
      * Create block state definition
+     *
      * @param builder The definition builder.
      */
     @Override
@@ -60,6 +68,7 @@ public class JewelSelectorTableBlock extends HorizontalDirectionalBlock implemen
 
     /**
      * This method allows to rotate block opposite to player.
+     *
      * @param context The placement context.
      * @return The new block state.
      */
@@ -73,6 +82,7 @@ public class JewelSelectorTableBlock extends HorizontalDirectionalBlock implemen
 
     /**
      * This method returns the shape of current table.
+     *
      * @param state The block state.
      * @param level The level where block is located.
      * @param pos The position of the block.
@@ -92,6 +102,7 @@ public class JewelSelectorTableBlock extends HorizontalDirectionalBlock implemen
 
     /**
      * The interaction that happens when player click on block.
+     *
      * @param state The block state.
      * @param level The level where block is located.
      * @param pos The position of the block.
@@ -119,7 +130,9 @@ public class JewelSelectorTableBlock extends HorizontalDirectionalBlock implemen
 
             if (tile instanceof JewelSelectorTableTileEntity vaultJewelApplicationStationTile)
             {
-                NetworkHooks.openGui(serverPlayer, vaultJewelApplicationStationTile, buffer -> buffer.writeBlockPos(pos));
+                NetworkHooks.openGui(serverPlayer,
+                    vaultJewelApplicationStationTile,
+                    buffer -> buffer.writeBlockPos(pos));
                 return InteractionResult.SUCCESS;
             }
             else
@@ -136,6 +149,7 @@ public class JewelSelectorTableBlock extends HorizontalDirectionalBlock implemen
 
     /**
      * This method indicates if entities can path find over this block.
+     *
      * @param state The block state.
      * @param level Level where block is located.
      * @param pos Position of the block.
@@ -151,6 +165,7 @@ public class JewelSelectorTableBlock extends HorizontalDirectionalBlock implemen
 
     /**
      * This method drops all items from container when block is broken.
+     *
      * @param state The BlockState.
      * @param level Level where block is broken.
      * @param pos Position of broken block.
@@ -158,7 +173,11 @@ public class JewelSelectorTableBlock extends HorizontalDirectionalBlock implemen
      * @param isMoving Boolean if block is moving.
      */
     @Override
-    public void onRemove(BlockState state, @NotNull Level level, @NotNull BlockPos pos, BlockState newState, boolean isMoving)
+    public void onRemove(BlockState state,
+        @NotNull Level level,
+        @NotNull BlockPos pos,
+        BlockState newState,
+        boolean isMoving)
     {
         if (!state.is(newState.getBlock()))
         {
@@ -203,6 +222,7 @@ public class JewelSelectorTableBlock extends HorizontalDirectionalBlock implemen
 
     /**
      * This method creates a new block entity.
+     *
      * @param pos Position for block.
      * @param state Block state.
      * @return New block entity.
@@ -213,6 +233,89 @@ public class JewelSelectorTableBlock extends HorizontalDirectionalBlock implemen
         return MoreVaultTablesReferences.JEWEL_SELECTOR_TABLE_TILE_ENTITY.create(pos, state);
     }
 
+
+    /**
+     * Triggers when block is placed by.
+     * @param level World where it is placed.
+     * @param pos Placement position
+     * @param state Placement state
+     * @param placer The placer object
+     * @param stack The items stack
+     */
+    @Override
+    public void setPlacedBy(@NotNull Level level,
+        @NotNull BlockPos pos,
+        @NotNull BlockState state,
+        @Nullable LivingEntity placer,
+        @NotNull ItemStack stack)
+    {
+        super.setPlacedBy(level, pos, state, placer, stack);
+
+        if (placer instanceof Player player)
+        {
+            BlockEntity blockEntity = level.getBlockEntity(pos);
+
+            if (blockEntity instanceof JewelSelectorTableTileEntity tileEntity)
+            {
+                tileEntity.setOwner(player);
+            }
+        }
+    }
+
+
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level level,
+        @NotNull BlockState state,
+        @NotNull BlockEntityType<T> type)
+    {
+        return createTickerHelper(type,
+            MoreVaultTablesReferences.JEWEL_SELECTOR_TABLE_TILE_ENTITY,
+            (world, pos, blockState, tileEntity) -> tileEntity.tick());
+    }
+
+
+    @Override
+    public boolean canConnectRedstone(BlockState state, BlockGetter level, BlockPos pos, @Nullable Direction direction)
+    {
+        return true;
+    }
+
+
+    @Override
+    public void neighborChanged(@NotNull BlockState state,
+        @NotNull Level level,
+        @NotNull BlockPos pos,
+        @NotNull Block block,
+        @NotNull BlockPos fromPos,
+        boolean moving)
+    {
+        super.neighborChanged(state, level, pos, block, fromPos, moving);
+
+        if (level.getBlockEntity(pos) instanceof JewelSelectorTableTileEntity tileEntity)
+        {
+            tileEntity.setRedstonePowered(level.hasNeighborSignal(pos));
+        }
+    }
+
+
+    /**
+     * This method creates requested tick block.
+     *
+     * @param <E> the type parameter
+     * @param <A> the type parameter
+     * @param type the type
+     * @param expectedType the expected type
+     * @param ticker the ticker
+     * @return the block entity ticker
+     */
+    @Nullable
+    public static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(
+        BlockEntityType<A> type,
+        BlockEntityType<E> expectedType,
+        BlockEntityTicker<? super E> ticker)
+    {
+        return type == expectedType ? (BlockEntityTicker<A>) ticker : null;
+    }
 
     /**
      * The constant SHAPE.

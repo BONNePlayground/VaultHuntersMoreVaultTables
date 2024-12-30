@@ -2,15 +2,10 @@ package lv.id.bonne.vaulthunters.morevaulttables.block.menu;
 
 
 import org.jetbrains.annotations.NotNull;
-import java.util.List;
 
-import iskallia.vault.container.oversized.OverSizedInventory;
 import iskallia.vault.container.oversized.OverSizedSlotContainer;
 import iskallia.vault.container.oversized.OverSizedTabSlot;
 import iskallia.vault.container.slot.TabSlot;
-import iskallia.vault.core.random.JavaRandom;
-import iskallia.vault.core.random.RandomSource;
-import iskallia.vault.init.ModConfigs;
 import iskallia.vault.item.BoosterPackItem;
 import iskallia.vault.item.CardItem;
 import lv.id.bonne.vaulthunters.morevaulttables.block.entity.CardSelectorTableTileEntity;
@@ -45,8 +40,7 @@ public class CardSelectorTableContainer extends OverSizedSlotContainer implement
     public CardSelectorTableContainer(int windowId, Level world, BlockPos pos, Inventory playerInventory)
     {
         super(MoreVaultTablesReferences.CARD_SELECTOR_TABLE_CONTAINER, windowId, playerInventory.player);
-        this.tilePos = pos;
-        BlockEntity tile = world.getBlockEntity(this.tilePos);
+        BlockEntity tile = world.getBlockEntity(pos);
 
         if (tile instanceof CardSelectorTableTileEntity craftingStationTileEntity)
         {
@@ -62,6 +56,7 @@ public class CardSelectorTableContainer extends OverSizedSlotContainer implement
 
     /**
      * This method init slots when player opens inventory.
+     *
      * @param playerInventory The player inventory list.
      */
     private void initSlots(Inventory playerInventory)
@@ -151,6 +146,7 @@ public class CardSelectorTableContainer extends OverSizedSlotContainer implement
 
     /**
      * This method quick moves stacks between inventories.
+     *
      * @param player The player that performs quick move.
      * @param index The clicked index.
      * @return The moved item stack.
@@ -219,17 +215,6 @@ public class CardSelectorTableContainer extends OverSizedSlotContainer implement
 
 
     /**
-     * Gets tile pos.
-     *
-     * @return the tile pos
-     */
-    public BlockPos getTilePos()
-    {
-        return this.tilePos;
-    }
-
-
-    /**
      * Gets tile entity.
      *
      * @return the tile entity
@@ -242,6 +227,7 @@ public class CardSelectorTableContainer extends OverSizedSlotContainer implement
 
     /**
      * This method returns if current container is still valid.
+     *
      * @param player Player who opens menu.
      * @return {@code true} if container is valid, {@code false} otherwise.
      */
@@ -254,37 +240,19 @@ public class CardSelectorTableContainer extends OverSizedSlotContainer implement
 
     /**
      * This method identifies a pouch item in selected slot.
+     *
      * @param serverPlayer player who performs identification.
      */
     @Override
     public void identifySelectedItem(ServerPlayer serverPlayer)
     {
-        ItemStack selectedBoosterPack = this.getTileEntity().getSelectedPack();
-
-        if (selectedBoosterPack.isEmpty() || BoosterPackItem.getOutcomes(selectedBoosterPack) != null)
-        {
-            // Not a pack or pack is identified already.
-            return;
-        }
-
-        if (BoosterPackItem.getOutcomes(selectedBoosterPack) == null)
-        {
-            RandomSource random = JavaRandom.ofNanoTime();
-            String id = BoosterPackItem.getId(selectedBoosterPack);
-            BoosterPackItem.setOutcomes(selectedBoosterPack,
-                ModConfigs.BOOSTER_PACK.getOutcomes(id, random).stream().
-                    map(CardItem::create).
-                    peek(item ->
-                        item.inventoryTick(serverPlayer.level, serverPlayer, 0, false)).toList());
-        }
-
-        // Trigger update on menu.
-        this.getTileEntity().updateSelectedPack(selectedBoosterPack);
+        this.getTileEntity().identifySelectedItem(serverPlayer);
     }
 
 
     /**
      * This method craft card item in given slot and moves into crafting slot new pack.
+     *
      * @param slotIndex Slot index.
      * @param serverPlayer Server player.
      * @return {@code true} there should broadcast changes, {@code false} otherwise.
@@ -292,62 +260,7 @@ public class CardSelectorTableContainer extends OverSizedSlotContainer implement
     @Override
     public boolean craftAndMoveItem(int slotIndex, ServerPlayer serverPlayer)
     {
-        ItemStack selectedBoosterPack = this.getTileEntity().getSelectedPack();
-
-        if (selectedBoosterPack.isEmpty() || BoosterPackItem.getOutcomes(selectedBoosterPack) == null)
-        {
-            // Do not have card in pouch.
-            return false;
-        }
-
-        List<ItemStack> cards = BoosterPackItem.getOutcomes(selectedBoosterPack);
-
-        if (cards.size() == 2)
-        {
-            // I add 3 empty spots before it.
-            slotIndex -= 3;
-        }
-
-        if (cards.size() < slotIndex)
-        {
-            // Clicked outside card.
-            return false;
-        }
-
-        if (this.getTileEntity().getTotalSizeInCards() < 60)
-        {
-            boolean moved = false;
-
-            OverSizedInventory outputInventory = this.getTileEntity().getOutputInventory();
-
-            for (int i = 0; i < outputInventory.getContainerSize() && !moved; i++)
-            {
-                ItemStack item = outputInventory.getItem(i);
-
-                if (item.isEmpty())
-                {
-                    outputInventory.setItem(i, cards.get(slotIndex));
-                    moved = true;
-                }
-            }
-
-            if (moved)
-            {
-                // Remove item.
-                OverSizedInventory inputInventory = this.getTileEntity().getInputInventory();
-                inputInventory.setItem(0, ItemStack.EMPTY);
-
-                this.moveItem();
-            }
-            else
-            {
-                // Log error message about no slots.
-            }
-
-            return true;
-        }
-
-        return false;
+        return this.getTileEntity().craftAndMoveItem(slotIndex, serverPlayer);
     }
 
 
@@ -357,47 +270,7 @@ public class CardSelectorTableContainer extends OverSizedSlotContainer implement
     @Override
     public void moveItem()
     {
-        // Remove item.
-        OverSizedInventory inputInventory = this.getTileEntity().getInputInventory();
-
-        if (!inputInventory.getItem(0).isEmpty())
-        {
-            return;
-        }
-
-        if (this.getTileEntity().getTotalSizeInPacks() <= 0)
-        {
-            return;
-        }
-
-        // Get next item
-        for (int i = 1; i < inputInventory.getContainerSize(); i++)
-        {
-            ItemStack item = inputInventory.getItem(i);
-
-            if (!item.isEmpty())
-            {
-                if (item.getCount() > 1)
-                {
-                    // Reduce count by 1
-                    ItemStack copy = item.copy();
-                    copy.setCount(copy.getCount() - 1);
-                    inputInventory.setItem(i, copy);
-                }
-                else
-                {
-                    // Set item stack to air
-                    inputInventory.setItem(i, ItemStack.EMPTY);
-                }
-
-                // set count to 1
-                item.setCount(1);
-
-                // set item in first slot.
-                inputInventory.setItem(0, item);
-                break;
-            }
-        }
+        this.getTileEntity().moveItem();
     }
 
 
@@ -405,9 +278,4 @@ public class CardSelectorTableContainer extends OverSizedSlotContainer implement
      * The tile entity that is selected.
      */
     private final CardSelectorTableTileEntity tileEntity;
-
-    /**
-     * The title pos for container.
-     */
-    private final BlockPos tilePos;
 }
