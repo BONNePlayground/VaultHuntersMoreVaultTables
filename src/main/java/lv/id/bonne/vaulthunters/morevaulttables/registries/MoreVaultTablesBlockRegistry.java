@@ -96,8 +96,7 @@ public class MoreVaultTablesBlockRegistry
             BlockBehaviour.Properties.copy(Blocks.STONECUTTER).
                 strength(0.3f).
                 sound(SoundType.CALCITE).
-                noOcclusion().
-                requiresCorrectToolForDrops(),
+                noOcclusion(),
             JEWEL_TABLE_SHAPE
         )
     );
@@ -110,8 +109,7 @@ public class MoreVaultTablesBlockRegistry
             BlockBehaviour.Properties.copy(Blocks.STONECUTTER).
                 strength(0.3f).
                 sound(SoundType.CALCITE).
-                noOcclusion().
-                requiresCorrectToolForDrops(),
+                noOcclusion(),
             JEWEL_TABLE_SHAPE
         )
     );
@@ -124,8 +122,7 @@ public class MoreVaultTablesBlockRegistry
             BlockBehaviour.Properties.copy(Blocks.GRASS_BLOCK).
                 strength(0.3f).
                 sound(SoundType.METAL).
-                noOcclusion().
-                requiresCorrectToolForDrops(),
+                noOcclusion(),
             DOLL_DISMANTLING_SHAPE
         )
     );
