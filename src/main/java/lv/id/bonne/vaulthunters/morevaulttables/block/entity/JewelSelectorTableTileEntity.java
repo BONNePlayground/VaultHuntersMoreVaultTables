@@ -697,7 +697,7 @@ public class JewelSelectorTableTileEntity extends BlockEntity implements MenuPro
     {
         ItemStack selectedPouch = this.getSelectedPouch();
 
-        if (selectedPouch.isEmpty() || !selectedPouch.getOrCreateTag().isEmpty())
+        if (selectedPouch.isEmpty() || !JewelPouchItem.getJewels(selectedPouch).isEmpty())
         {
             // Not a jewel pouch or pouch is identified already.
             return;
