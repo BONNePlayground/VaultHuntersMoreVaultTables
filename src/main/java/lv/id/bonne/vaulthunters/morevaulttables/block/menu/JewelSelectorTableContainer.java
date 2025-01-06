@@ -107,6 +107,20 @@ public class JewelSelectorTableContainer extends OverSizedSlotContainer implemen
                     }
                 }
             }
+
+
+            @Override
+            public int getMaxStackSize()
+            {
+                return 1;
+            }
+
+
+            @Override
+            public int getMaxStackSize(@NotNull ItemStack stack)
+            {
+                return 1;
+            }
         });
 
         for (i = 0; i < 20; ++i)
