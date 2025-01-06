@@ -1,10 +1,12 @@
 package lv.id.bonne.vaulthunters.morevaulttables.block.entity;
 
 
+import com.mojang.authlib.GameProfile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import iskallia.vault.block.entity.base.FilteredInputInventoryTileEntity;
 import iskallia.vault.container.oversized.OverSizedInvWrapper;
@@ -24,6 +26,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
@@ -36,6 +39,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.EnergyStorage;
@@ -237,6 +241,9 @@ public class CardSelectorTableTileEntity extends BlockEntity implements MenuProv
         // Load energy data from NBT
         this.energyStorage.receiveEnergy(tag.getInt(CardSelectorTableTileEntity.ENERGY), false);
         this.redstonePowered = tag.getBoolean(CardSelectorTableTileEntity.REDSTONE);
+
+        this.ownerUUID = tag.contains(CardSelectorTableTileEntity.UUID) ?
+            tag.getUUID(CardSelectorTableTileEntity.UUID) : null;
     }
 
 
@@ -264,6 +271,11 @@ public class CardSelectorTableTileEntity extends BlockEntity implements MenuProv
         // Put energy storing in tile entity
         tag.putInt(CardSelectorTableTileEntity.ENERGY, this.energyStorage.getEnergyStored());
         tag.putBoolean(CardSelectorTableTileEntity.REDSTONE, this.redstonePowered);
+
+        if (this.ownerUUID != null)
+        {
+            tag.putUUID(CardSelectorTableTileEntity.UUID, this.ownerUUID);
+        }
     }
 
 
@@ -685,18 +697,35 @@ public class CardSelectorTableTileEntity extends BlockEntity implements MenuProv
             return;
         }
 
-        if (BoosterPackItem.getOutcomes(selectedBoosterPack) == null)
+        if (BoosterPackItem.getOutcomes(selectedBoosterPack) == null && this.getLevel() instanceof ServerLevel serverLevel)
         {
+            final ServerPlayer player = serverPlayer != null ?
+                serverPlayer :
+                new FakePlayer(serverLevel,
+                    new GameProfile(this.ownerUUID == null ? java.util.UUID.randomUUID() : this.ownerUUID, "fake"));
+
             RandomSource random = JavaRandom.ofNanoTime();
             String id = BoosterPackItem.getId(selectedBoosterPack);
             BoosterPackItem.setOutcomes(selectedBoosterPack,
                 ModConfigs.BOOSTER_PACK.getOutcomes(id, random).stream().
                     map(CardItem::create).
+                    peek((item) -> item.inventoryTick(serverLevel, player, 0, false)).
                     toList());
         }
 
         // Trigger update on menu.
         this.updateSelectedPack(selectedBoosterPack);
+    }
+
+
+    /**
+     * Sets owner.
+     *
+     * @param player the player
+     */
+    public void setOwner(Player player)
+    {
+        this.ownerUUID = player.getUUID();
     }
 
 
@@ -718,6 +747,11 @@ public class CardSelectorTableTileEntity extends BlockEntity implements MenuProv
      * This variable stores how much energy is consumed by current tile entity.
      */
     private final int energyConsumption;
+
+    /**
+     * The block owner uuid.
+     */
+    private UUID ownerUUID;
 
     /**
      * This variable stores if table is powered by redstone.
@@ -790,4 +824,9 @@ public class CardSelectorTableTileEntity extends BlockEntity implements MenuProv
      * The parameter for data storage.
      */
     private static final String REDSTONE = "redstone";
+
+    /**
+     * The parameter for player UUID.
+     */
+    private static final String UUID = "uuid";
 }

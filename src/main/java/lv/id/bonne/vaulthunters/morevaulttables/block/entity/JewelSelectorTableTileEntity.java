@@ -835,5 +835,8 @@ public class JewelSelectorTableTileEntity extends BlockEntity implements MenuPro
      */
     private static final String REDSTONE = "redstone";
 
+    /**
+     * The parameter for data storage.
+     */
     private static final String UUID = "uuid";
 }
